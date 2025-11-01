@@ -1,11 +1,10 @@
-// lib/types1.ts
-
+// 
 export interface Education {
   university: string;
   degree: string;
   emphasis: string;
-  location: string;
   fieldOfStudy: string;
+  location: string;
   date: string;
   gpa: string;
 }
@@ -23,9 +22,9 @@ export interface Skill {
   operating: string;
   database: string;
   software: string;
-  Frameworks: string;
-  Cloud: string;
-  Languages: string;
+  frameworks: string;
+  cloud: string;
+  languages: string;
 }
 
 export interface Project {
@@ -46,14 +45,13 @@ export interface ResumeData {
   github: string;
   summary: string;
   degree: string;
-  skills: Skill[];
-  skill: string[];
+  skills: Skill[];          
   photo?: string;
   relevantCoursework?: string[];
   experience: Experience[];
   education: Education[];
   projects: Project[];
-  interests: [],
-  languages: [],
+  interests: string[];
+  languages: string[];
   achievement: string[];
 }

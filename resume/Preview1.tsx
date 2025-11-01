@@ -182,13 +182,13 @@ const Preview: React.FC<PreviewProps> = ({ data }) => {
           {safeData.skills.map((skill, i) => (
             <div key={i} className="text-sm mb-1">
               <p>
-                <strong>Languages:</strong> {skill.Languages}
+                <strong>Languages:</strong> {skill.languages}
               </p>
               <p>
-                <strong>Frameworks:</strong> {skill.Frameworks}
+                <strong>Frameworks:</strong> {skill.frameworks}
               </p>
               <p>
-                <strong>Cloud/Database/Tech Stack:</strong> {skill.Cloud}
+                <strong>Cloud/Database/Tech Stack:</strong> {skill.cloud}
               </p>
             </div>
           ))}

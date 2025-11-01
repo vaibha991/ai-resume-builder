@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ResumeData } from "@/lib/types1";
+import { ResumeData, Skill } from "@/lib/types1";
+import { improveText } from "@/lib/ai";
+
 
 interface FormProps {
     initialData: ResumeData;
@@ -13,14 +15,46 @@ interface FormProps {
     isNew?: boolean;
 }
 
+
 export default function ResumeForm({ initialData, onChange }: FormProps) {
     const [form, setForm] = useState<ResumeData>(initialData);
+    const [formData, setFormData] = useState<ResumeData>(initialData);
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        setFormData(initialData);
+    }, [initialData]);
+
 
     const handleChange = (key: string, value: any) => {
         const updated = { ...form, [key]: value };
         setForm(updated);
         onChange(updated);
     };
+
+
+    const handleImproveSummary = async () => {
+        if (!formData.summary) return;
+        try {
+            setLoading(true);
+            const improved = await improveText(formData.summary, "summary");
+            const updated = { ...formData, summary: improved };
+            setFormData(updated);
+            onChange(updated);
+        } catch (error) {
+            console.error("AI improvement failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    const handleAddItem = <T,>(field: keyof ResumeData, emptyItem: T) => {
+        const updatedArray = [...(form[field] as T[]), emptyItem];
+        const updatedForm = { ...form, [field]: updatedArray };
+        setForm(updatedForm);
+        onChange(updatedForm);
+    };
+
 
     const handleArrayChange = (
         section: keyof ResumeData,
@@ -53,6 +87,7 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
             };
             reader.readAsDataURL(file);
         }
+
     };
 
     return (
@@ -126,6 +161,14 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
                     value={form.summary}
                     onChange={(e) => handleChange("summary", e.target.value)}
                 />
+                <Button
+                    type="button"
+                    onClick={handleImproveSummary}
+                    disabled={loading}
+                    className="bg-blue-600 text-white mt-2"
+                >
+                    {loading ? "Improving..." : "Improve with AI"}
+                </Button>
             </div>
 
             {/* Work History */}
@@ -229,18 +272,51 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
             {/* Skills */}
             <div>
                 <h2 className="text-2xl font-semibold border-b pb-1 mb-4">Skills</h2>
-                <Textarea
-                    placeholder="e.g. HTML, CSS, JavaScript, React"
-                    value={form.skill.join(", ")} // show joined text
-                    onChange={(e) =>
-                        onChange({
-                            ...form,
-                            skill: e.target.value.split(",").map((s) => s.trim()), // ✅ convert to array
+                {form.skills.map((skill: Skill, i) => (
+                    <div key={i} className="border p-3 rounded mb-3 space-y-2">
+                        <Input
+                            placeholder="Languages (e.g. JS, Python)"
+                            value={skill.languages}
+                            onChange={(e) =>
+                                handleArrayChange("skills", i, "languages", e.target.value)
+                            }
+                        />
+                        <Input
+                            placeholder="Frameworks (e.g. React, Node)"
+                            value={skill.frameworks}
+                            onChange={(e) =>
+                                handleArrayChange("skills", i, "frameworks", e.target.value)
+                            }
+                        />
+                        <Input
+                            placeholder="Cloud / Database"
+                            value={skill.cloud}
+                            onChange={(e) =>
+                                handleArrayChange("skills", i, "cloud", e.target.value)
+                            }
+                        />
+
+                    </div>
+                ))}
+
+                <Button
+                    type="button"
+                    onClick={() =>
+                        handleAddItem<Skill>("skills", {
+                            programming: "",
+                            operating: "",
+                            database: "",
+                            software: "",
+                            frameworks: "",
+                            cloud: "",
+                            languages: "",
                         })
                     }
-                />
-
+                >
+                    + Add Skill
+                </Button>
             </div>
+
         </div>
     );
 }

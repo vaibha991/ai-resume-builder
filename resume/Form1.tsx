@@ -81,13 +81,13 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
         <h2 className="text-xl font-bold mb-2">Skills</h2>
         {formData.skills.map((skill, i) => (
           <div key={i} className="space-y-2">
-            <Input placeholder="Languages" value={skill.Languages} onChange={(e) => handleArrayChange<Skill>("skills", i, "Languages", e.target.value)} />
-            <Input placeholder="Frameworks" value={skill.Frameworks} onChange={(e) => handleArrayChange<Skill>("skills", i, "Frameworks", e.target.value)} />
-            <Input placeholder="Cloud/Database" value={skill.Cloud} onChange={(e) => handleArrayChange<Skill>("skills", i, "Cloud", e.target.value)} />
+            <Input placeholder="Languages" value={skill.languages} onChange={(e) => handleArrayChange<Skill>("skills", i, "languages", e.target.value)} />
+            <Input placeholder="Frameworks" value={skill.frameworks} onChange={(e) => handleArrayChange<Skill>("skills", i, "frameworks", e.target.value)} />
+            <Input placeholder="Cloud/Database" value={skill.cloud} onChange={(e) => handleArrayChange<Skill>("skills", i, "cloud", e.target.value)} />
             <Button type="button" variant="destructive" onClick={() => handleRemoveItem("skills", i)}>Remove</Button>
           </div>
         ))}
-        <Button type="button" onClick={() => handleAddItem<Skill>("skills", { Languages: "", Frameworks: "", Cloud: "", database: "", programming: "", operating: "", software: "" })}>
+        <Button type="button" onClick={() => handleAddItem<Skill>("skills", { languages: "", frameworks: "", cloud: "", database: "", programming: "", operating: "", software: "" })}>
           Add Skill
         </Button>
       </div>
@@ -104,7 +104,7 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
             <Button type="button" variant="destructive" onClick={() => handleRemoveItem("experience", i)}>Remove</Button>
           </div>
         ))}
-        <Button type="button" onClick={() => handleAddItem<Experience>("experience", { company: "", position: "", duration: "", description: "" })}>
+        <Button type="button" onClick={() => handleAddItem<Experience>("experience", { company: "", position: "", duration: "", description: "", location:""})}>
           Add Experience
         </Button>
       </div>

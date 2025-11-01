@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Form from "@/resume/Form2"; // your form.tsx with photo section
-import Preview from "@/resume/Preview2";
-import { ResumeData } from "@/lib/types1";
+import Form from "@/resume/Form3";
+import Preview from "@/resume/Preview3";
+import { ResumeData } from "@/lib/types2";
 
 export default function ResumePage() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
 
-  // ✅ Load resume data from localStorage on mount
   useEffect(() => {
     try {
       const storedResumes = localStorage.getItem("resumes");
@@ -21,26 +20,33 @@ export default function ResumePage() {
         }
       }
 
-      // ✅ Empty structure for a fresh resume
+      // Default empty resume
       const emptyData: ResumeData = {
         name: "",
-        title: "",
-        jobtitle: "",           // added
         email: "",
         phone: "",
-        location: "",
         linkedin: "",
         github: "",
-        degree: "",
+        portfolio: "",
+        skillsSummary: "",
         summary: "",
-        photo: "",
+        location: "",
+
         education: [],
         experience: [],
         projects: [],
-        skills: [],             // Skill[] type           // string[] type, added
-        achievement: [],
-        interests: [],
-        languages: [],
+        certificates: [],
+
+        skills: {
+          technical: "",
+          soft: "",
+          frameworks: "",
+          languages: "",
+          platforms: "",
+          tools: "",
+        },
+
+
       };
 
       setResumeData(emptyData);
@@ -49,12 +55,10 @@ export default function ResumePage() {
     }
   }, []);
 
-  // ✅ Update state on form change
   const handleChange = (updatedData: ResumeData) => {
     setResumeData(updatedData);
   };
 
-  // ✅ Save to localStorage
   const handleSubmit = (data: ResumeData) => {
     try {
       const storedResumes = localStorage.getItem("resumes");
@@ -74,21 +78,18 @@ export default function ResumePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-8">Professional Resume Builder</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Professional Resume Builder
+      </h1>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Left Panel — Form */}
+        {/* Form */}
         <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
-          <Form
-            initialData={resumeData}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            isNew
-          />
+          <Form initialData={resumeData} onChange={handleChange} onSubmit={handleSubmit} />
         </div>
 
-        {/* Right Panel — Preview */}
-        <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
+        {/* Preview */}
+        <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh] border">
           <Preview data={resumeData} />
         </div>
       </div>

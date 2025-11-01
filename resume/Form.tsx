@@ -83,6 +83,7 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     position: "",
     duration: "",
     description: "",
+    location: "",
   };
 
   const emptyProject: Project = { name: "", description: "", tech: "" };
@@ -92,9 +93,9 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     operating: "",
     database: "",
     software: "",
-    Frameworks: "",
-    Cloud: "",
-    Languages: "",
+    frameworks: "",
+    cloud: "",
+    languages: "",
   };
 
   // --- Improve Summary with AI ---

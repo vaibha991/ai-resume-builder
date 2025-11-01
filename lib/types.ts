@@ -15,7 +15,8 @@ export interface Project {
 }
 export interface Skill {
   name: string;
-  details?: string[]; // sub-points under the skill
+  details?: string[];
+  Frameworks: string; // sub-points under the skill
 }
 export interface Experience {
   role: string;
