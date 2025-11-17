@@ -87,15 +87,6 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
         </div>
       </div>
 
-      {/* Summary */}
-      <div>
-        <h2 className="text-xl font-semibold border-b pb-2 mb-4">Profile Summary</h2>
-        <Textarea
-          placeholder="Short professional summary"
-          value={form.summary}
-          onChange={(e) => handleChange("summary", e.target.value)}
-        />
-      </div>
 
       {/* Education */}
       <div>
@@ -153,7 +144,7 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
         />
       </div>
 
-      
+
       {/* Work Experience */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Work Experience</h2>
@@ -185,10 +176,10 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Projects</h2>
         {form.projects.map((proj, i) => (
           <div key={i} className="border p-3 rounded mb-3 space-y-2">
-            <Input placeholder="Project Title" value={proj.name}
-              onChange={(e) => handleArrayChange("projects", i, "name", e.target.value)} />
-            <Input placeholder="Duration" value={proj.date}
-              onChange={(e) => handleArrayChange("projects", i, "date", e.target.value)} />
+            <Input placeholder="Project Title" value={proj.title}
+              onChange={(e) => handleArrayChange("projects", i, "title", e.target.value)} />
+            <Input placeholder="Duration" value={proj.duration}
+              onChange={(e) => handleArrayChange("projects", i, "duration", e.target.value)} />
             <Textarea placeholder="Project Details"
               value={proj.description}
               onChange={(e) => handleArrayChange("projects", i, "description", e.target.value)}
@@ -202,13 +193,17 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
 
       {/* Certificates */}
       <div>
-        <h2 className="text-xl font-semibold border-b pb-2 mb-4">Certificates</h2>
+        <h2 className="text-xl font-semibold border-b pb-2 mb-4">Certificate</h2>
         {form.certificates?.map((cert, i) => (
           <div key={i} className="border p-3 rounded mb-3">
             <Input placeholder="Certificate Title" value={cert.title}
               onChange={(e) => handleArrayChange("certificates", i, "title", e.target.value)} />
             <Input placeholder="Issued Date" value={cert.date}
               onChange={(e) => handleArrayChange("certificates", i, "date", e.target.value)} />
+            <Textarea placeholder="Certificate"
+              value={cert.description}
+              onChange={(e) => handleArrayChange("certificates", i, "description", e.target.value)}
+            />
           </div>
         ))}
         <Button onClick={() => addArrayItem("certificates", { title: "", date: "" })}>

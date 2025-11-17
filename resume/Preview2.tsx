@@ -2,7 +2,7 @@
 
 import React, { useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import html2canvas from "html2canvas";
+import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
 import { ResumeData } from "@/lib/types1";
 
@@ -11,68 +11,67 @@ interface PreviewProps {
 }
 
 const Preview: React.FC<PreviewProps> = ({ data }) => {
-  const resumeRef = useRef<HTMLDivElement>(null);
+    const resumeRef = useRef<HTMLDivElement>(null);
 
-  const handleDownload = useCallback(async () => {
-    const element = resumeRef.current;
-    if (!element) {
-      alert("Error: Resume content not available for download.");
-      return;
-    }
+    const handleDownload = useCallback(async () => {
+        const element = resumeRef.current;
+        if (!element) {
+            alert("Error: Resume content not available for download.");
+            return;
+        }
 
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 3,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: false,
-      });
+        try {
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                backgroundColor: "#ffffff",
+                useCORS: true,
+            });
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
-      const pdf = new jsPDF("p", "mm", "a4");
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const imgWidth = pdfWidth;
+            const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      let heightLeft = pdfHeight;
-      let position = 0;
+            // 🔥 Scale down to fit on one page
+            const ratio = Math.min(pdfHeight / imgHeight, 1);
+            const scaledHeight = imgHeight * ratio;
 
-      pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pdf.internal.pageSize.getHeight();
+            const yOffset = (pdfHeight - scaledHeight) / 2; // center vertically if smaller
 
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pdf.internal.pageSize.getHeight();
-      }
+            pdf.addImage(imgData, "PNG", 0, yOffset, pdfWidth, scaledHeight);
+            pdf.save(`${data.name || "resume"}.pdf`);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to download PDF. Please try again.");
+        }
+    }, [data.name]);
 
-      pdf.save(`${data.name || "resume"}.pdf`);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to download PDF. Please try again.");
-    }
-  }, [data.name]);
-
-  const safeData = data || {
-    name: "",
-    title: "",
-    jobtitle: "",
-    degree: "",
-    email: "",
-    phone: "",
-    location: "",
-    linkedin: "",
-    github: "",
-    summary: "",
-    education: [],
-    experience: [],
-    projects: [],
-    skills: [],
-    achievement: [],
-  };
+    const safeData = data || {
+        name: "",
+        title: "",
+        jobtitle: "",
+        degree: "",
+        email: "",
+        phone: "",
+        location: "",
+        linkedin: "",
+        github: "",
+        summary: "",
+        education: [],
+        experience: [],
+        projects: [],
+        skills: [],
+        achievement: [],
+    };
 
     return (
+        <div>
+            <div className="flex justify-end mb-4">
+                <Button onClick={handleDownload}>Download PDF</Button>
+            </div>
 
             <div
                 ref={resumeRef}
@@ -95,10 +94,6 @@ const Preview: React.FC<PreviewProps> = ({ data }) => {
                             {data.location && <span>• {data.location}</span>}
                             {data.linkedin && <span>• {data.linkedin}</span>}
                             {data.github && <span>• {data.github}</span>}
-
-                            {/* {data.linkedin && (
-                                <span>• <a href={data.linkedin}>LinkedIn</a></span>
-                            )} */}
                         </div>
                     </div>
                 </div>
@@ -110,7 +105,7 @@ const Preview: React.FC<PreviewProps> = ({ data }) => {
                         <p className="text-sm leading-relaxed">{data.summary}</p>
                     </section>
 
-                    
+
                 )}
 
                 {data.experience && data.experience.length > 0 && (
@@ -170,6 +165,7 @@ const Preview: React.FC<PreviewProps> = ({ data }) => {
 
 
             </div>
+        </div>
     );
 }
 

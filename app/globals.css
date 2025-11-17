@@ -126,5 +126,120 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-/* Optional dark mode support */
-@custom-variant dark (&:is(.dark *));
+/* ------------------------ */
+/* Light & Dark Theme Vars  */
+/* ------------------------ */
+:root {
+  --bg-main: #f9fafb;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --border-color: #e5e7eb;
+}
+
+.darkis {
+  --bg-main: #0b0f19;
+  --bg-card: #101623;
+  --text-main: #e2e8f0;
+  --border-color: #1e293b;
+}
+
+/* ------------------------ */
+/* Global Styles            */
+/* ------------------------ */
+html, body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background .25s ease, color .25s ease;
+}
+
+/* ------------------------ */
+/* Card / Panel styling     */
+/* ------------------------ */
+.resume-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: background .25s ease, border-color .25s ease;
+}
+
+
+
+
+/* ------------------------ */
+/* 3D Flip Card Utilities   */
+/* ------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Faster+One&family=Monoton&display=swap');
+
+@layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+}
+
+/* Optional: glowing text & gradient background section */
+.template-bg {
+  background: url("https://www.mysticsoftwares.com/images/mystic_bg_img1.gif");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+.template-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom right, rgba(29, 38, 113, 0.6), rgba(195, 55, 100, 0.6));
+  z-index: -1;
+}
+
+.template-title {
+  font-family: 'Monoton', cursive;
+  text-shadow: 2px 2px 10px #1D2671, 4px 4px 15px #C33764;
+}
+
+/* 🌠 Shooting Star Animation */
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(45deg, #ffffff, rgba(255,255,255,0));
+  opacity: 0.8;
+  border-radius: 9999px;
+  transform: rotate(45deg);
+  animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translate(-100px, -100px) rotate(45deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(900px, 900px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* ✨ Different timing + position for each star */
+.shooting-star-1 { top: 20%; left: 10%; animation-delay: 0s; }
+.shooting-star-2 { top: 10%; left: 60%; animation-delay: 1s; }
+.shooting-star-3 { top: 30%; left: 30%; animation-delay: 2s; }
+.shooting-star-4 { top: 40%; left: 80%; animation-delay: 3s; }
+.shooting-star-5 { top: 60%; left: 20%; animation-delay: 4s; }
+.shooting-star-6 { top: 70%; left: 70%; animation-delay: 5s; }

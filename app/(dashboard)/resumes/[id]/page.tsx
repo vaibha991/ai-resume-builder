@@ -28,6 +28,8 @@ export default function ResumePage() {
         name: "",
         title: "",
         email: "",
+        jobtitle: "",   
+        degree: "",
         phone: "",
         location: "",
         linkedin: "",

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Form from "@/resume/Form3";
 import Preview from "@/resume/Preview3";
 import { ResumeData } from "@/lib/types2";
+import "@/app/globals.css";
 
 export default function ResumePage() {
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
@@ -20,7 +21,6 @@ export default function ResumePage() {
         }
       }
 
-      // Default empty resume
       const emptyData: ResumeData = {
         name: "",
         email: "",
@@ -45,8 +45,6 @@ export default function ResumePage() {
           platforms: "",
           tools: "",
         },
-
-
       };
 
       setResumeData(emptyData);
@@ -77,19 +75,19 @@ export default function ResumePage() {
     );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-center mb-8">
-        Professional Resume Builder
+    <div className="min-h-screen p-6">
+      <h1 className="text-4xl font-bold text-center mb-10 tracking-tight">
+        Resume Builder
       </h1>
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Form */}
-        <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
+        <div className="resume-card p-6 overflow-y-auto max-h-[90vh] custom-scroll">
           <Form initialData={resumeData} onChange={handleChange} onSubmit={handleSubmit} />
         </div>
 
         {/* Preview */}
-        <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto max-h-[90vh] border">
+        <div className="resume-card p-6 overflow-y-auto max-h-[90vh] custom-scroll">
           <Preview data={resumeData} />
         </div>
       </div>

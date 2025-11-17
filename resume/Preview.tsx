@@ -12,31 +12,22 @@ interface ResumePreviewProps {
   data: ResumeData;
 }
 
-// PDF-Safe Bullet Point Component
-interface BulletPointItemProps {
-  content: string;
-}
-function BulletPointItem({ content }: BulletPointItemProps) {
-  return (
-    <div className="flex">
-      <span className="mr-2 text-sm leading-snug align-top">•</span>
-      <p className="flex-1 text-sm">{content}</p>
-    </div>
-  );
-}
+// PDF-safe bullet point component with proper multi-line alignment
+const BulletPointItem: React.FC<{ content: string }> = ({ content }) => (
+  <p className="text-sm leading-snug relative pl-4 mb-1">
+    <span className="absolute left-0 top-0 text-black">•</span>
+    {content}
+  </p>
+);
 
 const Preview: React.FC<ResumePreviewProps> = ({ data }) => {
   const resumeRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = useCallback(async () => {
-    const element = resumeRef.current;
-    if (!element) {
-      alert("Error: Resume content not available for download.");
-      return;
-    }
+    if (!resumeRef.current) return alert("Resume content not available for download.");
 
     try {
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(resumeRef.current, {
         scale: 3,
         backgroundColor: "#ffffff",
         useCORS: true,
@@ -45,7 +36,6 @@ const Preview: React.FC<ResumePreviewProps> = ({ data }) => {
 
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
       const pdf = new jsPDF("p", "mm", "a4");
-
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
@@ -80,12 +70,12 @@ const Preview: React.FC<ResumePreviewProps> = ({ data }) => {
         Download PDF
       </button>
 
-      {/* Wrap Card in a native div to attach ref */}
+      {/* Resume Content */}
       <div ref={resumeRef}>
         <Card className="max-w-3xl mx-auto my-6 border shadow-md bg-white">
-          <CardContent className="p-8 space-y-6">
+          <CardContent className="p-8 space-y-3">
             {/* Header */}
-            <div className="text-center border-b pb-4 space-y-2">
+            <div className="text-center pb-2 space-y-1">
               <h1 className="text-3xl font-bold">{data.name || "Your Name"}</h1>
               <p className="text-gray-600">{data.title}</p>
 
@@ -136,138 +126,110 @@ const Preview: React.FC<ResumePreviewProps> = ({ data }) => {
               </p>
             </div>
 
-
             {/* Summary */}
             {data.summary && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Summary</h2>
-                <p className="text-gray-700 leading-relaxed">{data.summary}</p>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Summary</h2>
+                <p className="text-gray-700 leading-relaxed text-sm">{data.summary}</p>
               </section>
             )}
 
-
+            {/* Education */}
             {Array.isArray(data.education) && data.education.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Education</h2>
-
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Education</h2>
                 {data.education.map((edu, i) => (
-                  <div key={i} className="mb-4 space-y-2 text-sm">
-
-                    {/* Row 1: University - Location */}
+                  <div key={i} className="mb-2 space-y-1 text-sm">
                     <div className="flex justify-between">
                       <p className="font-arial text-black font-black text-sm">{edu.university}</p>
                       <p className="text-gray-700">{edu.location}</p>
                     </div>
-
-                    {/* Row 2: Degree - Date */}
                     <div className="flex justify-between">
                       <p className="text-gray-700">{edu.degree}</p>
                       <p className="text-gray-600">{edu.date}</p>
                     </div>
-
-                    {/* Row 3: Field of Study - GPA */}
                     <div className="flex justify-between">
                       <p className="text-gray-700">{edu.fieldOfStudy}</p>
-                      <p className="text-gray-600">Major GPA: {edu.gpa}</p>
+                      <p className="text-gray-600">GPA: {edu.gpa}</p>
                     </div>
-
                   </div>
                 ))}
               </section>
             )}
+
             {/* Relevant Coursework */}
             {Array.isArray(data.relevantCoursework) && data.relevantCoursework.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Relevant Coursework</h2>
-                <p className="text-gray-700">
-                  {data.relevantCoursework.join(", ")}
-                </p>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Relevant Coursework</h2>
+                <p className="text-gray-700 text-sm">{data.relevantCoursework.join(", ")}</p>
               </section>
             )}
 
             {/* Skills */}
-
             {Array.isArray(data.skills) && data.skills.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Technical Skills</h2>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Technical Skills</h2>
                 {data.skills.map((skill, i) => (
-                  <div key={i} className="mb-2">
-                    <p className="text-gray-800 font-bold text-sm">
-                      Programming Languages: <span className="font-normal">{skill.programming}</span>
-                    </p>
-                    <p className="text-gray-800 font-bold text-sm">
-                      Operating Systems: <span className="font-normal">{skill.operating}</span>
-                    </p>
-                    <p className="text-gray-800 font-bold text-sm">
-                      Database: <span className="font-normal">{skill.database}</span>
-                    </p>
-                    <p className="text-gray-800 font-bold text-sm">
-                      Software Tools: <span className="font-normal">{skill.software}</span>
-                    </p>
+                  <div key={i} className="mb-1 text-sm space-y-0.5">
+                    {skill.programming && <BulletPointItem content={`Programming Languages: ${skill.programming}`} />}
+                    {skill.operating && <BulletPointItem content={`Operating Systems: ${skill.operating}`} />}
+                    {skill.database && <BulletPointItem content={`Database: ${skill.database}`} />}
+                    {skill.software && <BulletPointItem content={`Software Tools: ${skill.software}`} />}
                   </div>
                 ))}
               </section>
             )}
-
 
             {/* Experience */}
             {Array.isArray(data.experience) && data.experience.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Experience</h2>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Experience</h2>
                 {data.experience.map((exp, i) => (
-                  <div key={i} className="mb-3">
-                    <p className="font-semibold">
-                      {exp.position} @ {exp.company}
-                    </p>
-                    <p className="text-gray-500 text-sm">{exp.duration}</p>
-                    {exp.description && (
-                      <p className="text-gray-700 mt-1">{exp.description}</p>
-                    )}
+                  <div key={i} className="mb-2 text-sm space-y-1">
+                    <p className="font-semibold">{exp.position} @ {exp.company}</p>
+                    <p className="text-gray-700">{exp.duration}</p>
+                    {exp.description &&
+                      exp.description
+                        .split(". ")
+                        .filter(Boolean)
+                        .map((line, idx) => <BulletPointItem key={idx} content={line.trim() + "."} />)}
                   </div>
                 ))}
               </section>
             )}
 
-
-
             {/* Projects */}
             {Array.isArray(data.projects) && data.projects.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Projects</h2>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Projects</h2>
                 {data.projects.map((proj, i) => (
-                  <div key={i} className="mb-3">
+                  <div key={i} className="mb-2 text-sm space-y-1">
                     <div className="flex justify-between">
                       <p className="font-semibold">{proj.name}</p>
                       <p className="text-gray-500 text-sm">Tech: {proj.tech}</p>
                     </div>
-
-                    {/* Convert description into bullets */}
-                    <ul className="list-disc pl-5 mt-1">
-                      {proj.description
-                        ?.split(". ")
+                    {proj.description &&
+                      proj.description
+                        .split(". ")
                         .filter(Boolean)
-                        .map((line, idx) => (
-                          <li key={idx}>{line.trim()}</li>
-                        ))}
-                    </ul>
+                        .map((line, idx) => <BulletPointItem key={idx} content={line.trim() + "."} />)}
                   </div>
                 ))}
               </section>
             )}
 
-     
-
-            {/* Interests */}
+            {/* Achievements */}
             {Array.isArray(data.achievement) && data.achievement.length > 0 && (
-              <section>
-                <h2 className="text-xl font-semibold border-b mb-2">Achievement</h2>
-                <ul className="list-disc list-inside text-gray-700">
-                  {data.achievement.map((achievement, i) => (
-                    <li key={i}>{achievement}</li>
+              <section className="mb-2">
+                <h2 className="text-xl font-semibold border-b mb-1">Achievements</h2>
+                <div className="space-y-0.5"> {/* reduce spacing between bullets */}
+                  {data.achievement.map((achieve, i) => (
+                    <BulletPointItem key={i} content={achieve} />
                   ))}
-                </ul>
+                </div>
               </section>
             )}
+
           </CardContent>
         </Card>
       </div>
@@ -276,5 +238,3 @@ const Preview: React.FC<ResumePreviewProps> = ({ data }) => {
 };
 
 export default Preview;
-
-

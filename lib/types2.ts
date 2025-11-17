@@ -39,6 +39,8 @@ export interface Project {
   description: string;
   link?: string;
   name: string;
+  duration: string;
+  position: string;
   date: string;
 }
 
@@ -47,6 +49,7 @@ export interface Certificate {
   title: string;
   issuer: string;
   date: string;
+  description: string;
 }
 
 // 🧾 Full Resume Structure
