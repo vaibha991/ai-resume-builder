@@ -7,6 +7,7 @@ export interface Education {
   location: string;
   date: string;
   gpa: string;
+  [key: string]: unknown;
 }
 
 export interface Experience {
@@ -15,6 +16,7 @@ export interface Experience {
   duration: string;
   description?: string;
   location: string;
+  [key: string]: unknown;
 }
 
 export interface Skill {
@@ -25,12 +27,14 @@ export interface Skill {
   frameworks: string;
   cloud: string;
   languages: string;
+  [key: string]: unknown;
 }
 
 export interface Project {
   name: string;
   description?: string;
   tech: string;
+  [key: string]: unknown;
 }
 
 export interface ResumeData {
@@ -54,4 +58,5 @@ export interface ResumeData {
   interests: string[];
   languages: string[];
   achievement: string[];
+  [key: string]: unknown;
 }

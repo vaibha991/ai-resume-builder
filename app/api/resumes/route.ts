@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(resumes);
-  } catch (error) {
+  } catch  {
     return NextResponse.json({ error: "Failed to fetch resumes" }, { status: 500 });
   }
 }
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(newResume, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to create resume" }, { status: 500 });
   }
 }
@@ -61,7 +61,7 @@ export async function PUT(req: NextRequest) {
       data: { title: data.title, sections: data.sections },
     });
     return NextResponse.json(updatedResume);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update resume" }, { status: 500 });
   }
 }
@@ -81,7 +81,7 @@ export async function DELETE(req: NextRequest) {
 
     await prisma.resume.delete({ where: { id } });
     return NextResponse.json({ message: "Resume deleted" });
-  } catch (error) {
+  } catch  {
     return NextResponse.json({ error: "Failed to delete resume" }, { status: 500 });
   }
 }

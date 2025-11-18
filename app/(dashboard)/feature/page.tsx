@@ -1,16 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  Sparkles,
-  FileText,
-  Eye,
-  Cpu,
-  Layers,
-  Download,
-  Wand2,
-  BookmarkCheck,
-} from "lucide-react";
+import { FileText, Eye, Cpu, Layers, Download, Wand2 } from "lucide-react";
 
 export default function FeaturesPage() {
   return (

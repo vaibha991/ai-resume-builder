@@ -14,82 +14,71 @@ interface ImproveTestProps {
 }
 
 export default function ImproveTest({ onSubmit }: ImproveTestProps) {
-  // --- Contact Info ---
+  // Contact Info
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [github, setGithub] = useState("");
   const [linkedin, setLinkedin] = useState("");
 
-  // --- Summary ---
+  // Summary
   const [summary, setSummary] = useState("");
   const [summaryImproved, setSummaryImproved] = useState("");
   const [summaryLoading, setSummaryLoading] = useState(false);
 
-  // --- Experience ---
+  // Experience
   const [text, setText] = useState("");
   const [improved, setImproved] = useState("");
   const [loading, setLoading] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
   const [company, setCompany] = useState("");
 
-  // --- Skills ---
+  // Dynamic Sections
   const [skills, setSkills] = useState<string[]>([]);
-
-  // --- Languages ---
   const [languages, setLanguages] = useState<string[]>([]);
-
-  // --- Interests ---
   const [interests, setInterests] = useState<string[]>([]);
-
-  // --- Projects ---
   const [projects, setProjects] = useState<string[]>([]);
-
-  // --- Education ---
   const [educations, setEducations] = useState<string[]>([]);
 
-  // --- Location ---
+  // Location
   const [location, setLocation] = useState("");
 
-  // --- Handlers ---
-
-  // Improve Experience
+  // AI Improve Experience
   const handleImprove = async () => {
-    if (!text) return alert("Please enter text to improve.");
+    if (!text.trim()) return alert("Please enter text to improve.");
     setLoading(true);
     try {
       const result = await improveText(text);
       setImproved(result);
-    } catch (err) {
-      console.error("AI improvement failed:", err);
+    } catch {
       setImproved(text);
     } finally {
       setLoading(false);
     }
   };
 
-  // Improve Summary
+  // AI Improve Summary
   const handleImproveSummary = async () => {
-    if (!summary) return alert("Please enter summary to improve.");
+    if (!summary.trim()) return alert("Enter summary to improve.");
     setSummaryLoading(true);
     try {
       const result = await improveText(summary);
       setSummaryImproved(result);
-    } catch (err) {
-      console.error("AI improvement failed:", err);
+    } catch {
       setSummaryImproved(summary);
     } finally {
       setSummaryLoading(false);
     }
   };
 
-  // Contact Info
+  // Save Contact
   const handleSubmitContact = () => {
     onSubmit({
       id: crypto.randomUUID(),
       title: "Contact Info",
       content: `Full Name: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nGitHub: ${github}\nLinkedIn: ${linkedin}`,
     });
+
     setFullName("");
     setEmail("");
     setPhone("");
@@ -97,263 +86,218 @@ export default function ImproveTest({ onSubmit }: ImproveTestProps) {
     setLinkedin("");
   };
 
-  // Summary
+  // Save Summary
   const handleSubmitSummary = () => {
     const finalSummary = summaryImproved || summary;
-    if (!finalSummary.trim()) return alert("Please enter a summary!");
+    if (!finalSummary.trim()) return;
+
     onSubmit({
       id: crypto.randomUUID(),
       title: "Summary",
       content: finalSummary,
     });
+
     setSummary("");
     setSummaryImproved("");
   };
 
-  // Experience
+  // Save Experience
   const handleAddExperience = () => {
-    if (!jobTitle) return alert("Please enter Job Title!");
-    if (!improved) return alert("Improve the text first!");
+    if (!jobTitle.trim()) return alert("Enter job title.");
+    if (!improved.trim()) return alert("Improve with AI first.");
+
     onSubmit({
       id: crypto.randomUUID(),
       title: `${jobTitle} at ${company || "Company"}`,
       content: improved,
     });
+
     setText("");
     setImproved("");
     setJobTitle("");
     setCompany("");
   };
 
-  // Skills
-  const handleAddSkill = () => setSkills([...skills, ""]);
-  const handleSkillChange = (idx: number, val: string) =>
-    setSkills(skills.map((s, i) => (i === idx ? val : s)));
-  const handleRemoveSkill = (idx: number) =>
-    setSkills(skills.filter((_, i) => i !== idx));
-  const handleSubmitSkills = () => {
-    if (skills.length === 0 || skills.every(s => !s.trim())) return;
-    onSubmit({
-      id: crypto.randomUUID(),
-      title: "Skills",
-      content: skills.filter(s => s.trim()).join(", "),
-    });
-    setSkills([]);
-  };
-
-  // Languages
-  const handleAddLanguage = () => setLanguages([...languages, ""]);
-  const handleLanguageChange = (idx: number, val: string) =>
-    setLanguages(languages.map((l, i) => (i === idx ? val : l)));
-  const handleRemoveLanguage = (idx: number) =>
-    setLanguages(languages.filter((_, i) => i !== idx));
-  const handleSubmitLanguages = () => {
-    if (languages.length === 0 || languages.every(l => !l.trim())) return;
-    onSubmit({
-      id: crypto.randomUUID(),
-      title: "Languages",
-      content: languages.filter(l => l.trim()).join(", "),
-    });
-    setLanguages([]);
-  };
-
-  // Interests
-  const handleAddInterest = () => setInterests([...interests, ""]);
-  const handleInterestChange = (idx: number, val: string) =>
-    setInterests(interests.map((i, j) => (j === idx ? val : i)));
-  const handleRemoveInterest = (idx: number) =>
-    setInterests(interests.filter((_, j) => j !== idx));
-  const handleSubmitInterests = () => {
-    if (interests.length === 0 || interests.every(i => !i.trim())) return;
-    onSubmit({
-      id: crypto.randomUUID(),
-      title: "Interests",
-      content: interests.filter(i => i.trim()).join(", "),
-    });
-    setInterests([]);
-  };
-
-  // Projects
-  const handleAddProject = () => setProjects([...projects, ""]);
-  const handleProjectChange = (idx: number, val: string) =>
-    setProjects(projects.map((p, i) => (i === idx ? val : p)));
-  const handleRemoveProject = (idx: number) =>
-    setProjects(projects.filter((_, i) => i !== idx));
-  const handleSubmitProjects = () => {
-    if (projects.length === 0 || projects.every(p => !p.trim())) return;
-    onSubmit({
-      id: crypto.randomUUID(),
-      title: "Projects",
-      content: projects.filter(p => p.trim()).join(", "),
-    });
-    setProjects([]);
-  };
-
-  // Education
-  const handleAddEducation = () => setEducations([...educations, ""]);
-  const handleEducationChange = (idx: number, val: string) =>
-    setEducations(educations.map((e, i) => (i === idx ? val : e)));
-  const handleRemoveEducation = (idx: number) =>
-    setEducations(educations.filter((_, i) => i !== idx));
-  const handleSubmitEducation = () => {
-    if (educations.length === 0 || educations.every(e => !e.trim())) return;
-    onSubmit({
-      id: crypto.randomUUID(),
-      title: "Education",
-      content: educations.filter(e => e.trim()).join(", "),
-    });
-    setEducations([]);
-  };
-
-  // Location
+  // Save Location
   const handleSubmitLocation = () => {
     if (!location.trim()) return;
+
     onSubmit({
       id: crypto.randomUUID(),
       title: "Location",
       content: location,
     });
+
     setLocation("");
   };
 
   return (
     <div className="p-4 border rounded-lg space-y-6 bg-white shadow">
+      
       {/* Contact Info */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Contact Info</h2>
-        <input type="text" placeholder="Full Name" value={fullName} onChange={e => setFullName(e.target.value)} className="w-full p-2 border rounded"/>
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full p-2 border rounded"/>
-        <input type="text" placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} className="w-full p-2 border rounded"/>
-        <input type="text" placeholder="GitHub URL" value={github} onChange={e => setGithub(e.target.value)} className="w-full p-2 border rounded"/>
-        <input type="text" placeholder="LinkedIn URL" value={linkedin} onChange={e => setLinkedin(e.target.value)} className="w-full p-2 border rounded"/>
-        <button onClick={handleSubmitContact} className="px-4 py-2 bg-green-600 text-white rounded">Save Contact Info</button>
+
+        <input className="input" placeholder="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <input className="input" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="input" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input className="input" placeholder="GitHub URL" value={github} onChange={(e) => setGithub(e.target.value)} />
+        <input className="input" placeholder="LinkedIn URL" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+
+        <button onClick={handleSubmitContact} className="btn-green">Save Contact Info</button>
       </div>
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Location */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Location</h2>
-        <input type="text" placeholder="Location" value={location} onChange={e => setLocation(e.target.value)} className="w-full p-2 border rounded"/>
-        <button onClick={handleSubmitLocation} className="px-4 py-2 bg-green-600 text-white rounded mt-2">Save Location</button>
+        <input className="input" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Your Location" />
+        <button onClick={handleSubmitLocation} className="btn-green mt-2">Save Location</button>
       </div>
 
-      <hr className="my-4"/>
+      <hr />
 
-      {/* Summary with AI Improve */}
+      {/* Summary */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Professional Summary</h2>
-        <textarea
-          value={summary}
-          onChange={e => setSummary(e.target.value)}
-          rows={4}
-          placeholder="Write a brief summary about yourself..."
-          className="w-full p-2 border rounded"
-        />
-        <button onClick={handleImproveSummary} disabled={summaryLoading} className="px-4 py-2 bg-blue-600 text-white rounded mt-2">
+
+        <textarea className="input" rows={4} value={summary} onChange={(e) => setSummary(e.target.value)} />
+
+        <button onClick={handleImproveSummary} className="btn-blue">
           {summaryLoading ? "Improving..." : "Improve with AI"}
         </button>
+
         {summaryImproved && (
           <div className="mt-2 p-2 bg-gray-100 rounded">
             <p>{summaryImproved}</p>
           </div>
         )}
-        <button onClick={handleSubmitSummary} className="px-4 py-2 bg-green-600 text-white rounded mt-2">Save Summary</button>
+
+        <button onClick={handleSubmitSummary} className="btn-green">Save Summary</button>
       </div>
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Experience */}
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Experience</h2>
-        <input type="text" placeholder="Job Title" value={jobTitle} onChange={e => setJobTitle(e.target.value)} className="w-full p-2 border rounded"/>
-        <textarea value={text} onChange={e => setText(e.target.value)} rows={4} placeholder="Describe your role..." className="w-full p-2 border rounded"/>
-        <button onClick={handleImprove} disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded">
+
+        <input className="input" placeholder="Job Title" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} />
+        <textarea className="input" rows={4} placeholder="Describe your role..." value={text} onChange={(e) => setText(e.target.value)} />
+
+        <button onClick={handleImprove} className="btn-blue">
           {loading ? "Improving..." : "Improve with AI"}
         </button>
+
         {improved && (
-          <div className="mt-2 p-2 bg-gray-100 rounded space-y-2">
+          <div className="mt-2 p-2 bg-gray-100 rounded">
             <p>{improved}</p>
-            <input type="text" placeholder="Company Name" value={company} onChange={e => setCompany(e.target.value)} className="w-full p-2 border rounded mt-2"/>
-            <button onClick={handleAddExperience} className="mt-2 px-4 py-2 bg-green-600 text-white rounded">Add to Resume</button>
+            <input className="input mt-2" placeholder="Company Name" value={company} onChange={(e) => setCompany(e.target.value)} />
+            <button onClick={handleAddExperience} className="btn-green mt-2">Add Experience</button>
           </div>
         )}
       </div>
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Skills */}
       <SectionInput
         title="Skills"
         items={skills}
         onAdd={() => setSkills([...skills, ""])}
-        onChange={(i, val) => setSkills(skills.map((s, idx) => idx === i ? val : s))}
-        onRemove={i => setSkills(skills.filter((_, idx) => idx !== i))}
-        onSubmit={handleSubmitSkills}
+        onChange={(i, v) => setSkills(skills.map((s, idx) => idx === i ? v : s))}
+        onRemove={(i) => setSkills(skills.filter((_, idx) => idx !== i))}
+        onSubmit={() => {
+          if (skills.some((s) => s.trim())) {
+            onSubmit({ id: crypto.randomUUID(), title: "Skills", content: skills.join(", ") });
+            setSkills([]);
+          }
+        }}
         placeholder="Skill"
       />
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Languages */}
       <SectionInput
         title="Languages"
         items={languages}
         onAdd={() => setLanguages([...languages, ""])}
-        onChange={(i, val) => setLanguages(languages.map((l, idx) => idx === i ? val : l))}
-        onRemove={i => setLanguages(languages.filter((_, idx) => idx !== i))}
-        onSubmit={handleSubmitLanguages}
+        onChange={(i, v) => setLanguages(languages.map((s, idx) => idx === i ? v : s))}
+        onRemove={(i) => setLanguages(languages.filter((_, idx) => idx !== i))}
+        onSubmit={() => {
+          if (languages.some((s) => s.trim())) {
+            onSubmit({ id: crypto.randomUUID(), title: "Languages", content: languages.join(", ") });
+            setLanguages([]);
+          }
+        }}
         placeholder="Language"
       />
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Interests */}
       <SectionInput
         title="Interests"
         items={interests}
         onAdd={() => setInterests([...interests, ""])}
-        onChange={(i, val) => setInterests(interests.map((l, idx) => idx === i ? val : l))}
-        onRemove={i => setInterests(interests.filter((_, idx) => idx !== i))}
-        onSubmit={handleSubmitInterests}
+        onChange={(i, v) => setInterests(interests.map((s, idx) => idx === i ? v : s))}
+        onRemove={(i) => setInterests(interests.filter((_, idx) => idx !== i))}
+        onSubmit={() => {
+          if (interests.some((s) => s.trim())) {
+            onSubmit({ id: crypto.randomUUID(), title: "Interests", content: interests.join(", ") });
+            setInterests([]);
+          }
+        }}
         placeholder="Interest"
       />
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Projects */}
       <SectionInput
         title="Projects"
         items={projects}
         onAdd={() => setProjects([...projects, ""])}
-        onChange={(i, val) => setProjects(projects.map((l, idx) => idx === i ? val : l))}
-        onRemove={i => setProjects(projects.filter((_, idx) => idx !== i))}
-        onSubmit={handleSubmitProjects}
-        placeholder="Project Name"
+        onChange={(i, v) => setProjects(projects.map((s, idx) => idx === i ? v : s))}
+        onRemove={(i) => setProjects(projects.filter((_, idx) => idx !== i))}
+        onSubmit={() => {
+          if (projects.some((s) => s.trim())) {
+            onSubmit({ id: crypto.randomUUID(), title: "Projects", content: projects.join(", ") });
+            setProjects([]);
+          }
+        }}
+        placeholder="Project"
       />
 
-      <hr className="my-4"/>
+      <hr />
 
       {/* Education */}
       <SectionInput
         title="Education"
         items={educations}
         onAdd={() => setEducations([...educations, ""])}
-        onChange={(i, val) => setEducations(educations.map((l, idx) => idx === i ? val : l))}
-        onRemove={i => setEducations(educations.filter((_, idx) => idx !== i))}
-        onSubmit={handleSubmitEducation}
+        onChange={(i, v) => setEducations(educations.map((s, idx) => idx === i ? v : s))}
+        onRemove={(i) => setEducations(educations.filter((_, idx) => idx !== i))}
+        onSubmit={() => {
+          if (educations.some((s) => s.trim())) {
+            onSubmit({ id: crypto.randomUUID(), title: "Education", content: educations.join(", ") });
+            setEducations([]);
+          }
+        }}
         placeholder="Education"
       />
     </div>
   );
 }
 
-// --- Reusable SectionInput Component ---
+// Reusable Section
 interface SectionInputProps {
   title: string;
   items: string[];
   onAdd: () => void;
-  onChange: (idx: number, val: string) => void;
+  onChange: (idx: number, value: string) => void;
   onRemove: (idx: number) => void;
   onSubmit: () => void;
   placeholder?: string;
@@ -363,15 +307,22 @@ function SectionInput({ title, items, onAdd, onChange, onRemove, onSubmit, place
   return (
     <div className="space-y-2">
       <h2 className="text-xl font-semibold">{title}</h2>
+
       {items.map((item, idx) => (
         <div key={idx} className="flex gap-2 items-center">
-          <input type="text" placeholder={placeholder} value={item} onChange={e => onChange(idx, e.target.value)} className="flex-grow p-2 border rounded"/>
-          <button onClick={() => onRemove(idx)} className="px-3 py-1 bg-red-500 text-white rounded text-sm">Remove</button>
+          <input
+            className="input flex-grow"
+            value={item}
+            placeholder={placeholder}
+            onChange={(e) => onChange(idx, e.target.value)}
+          />
+          <button onClick={() => onRemove(idx)} className="btn-red">Remove</button>
         </div>
       ))}
+
       <div className="flex gap-2 mt-2">
-        <button onClick={onAdd} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add {title}</button>
-        <button onClick={onSubmit} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Save {title}</button>
+        <button onClick={onAdd} className="btn-blue">Add</button>
+        <button onClick={onSubmit} className="btn-green">Save</button>
       </div>
     </div>
   );

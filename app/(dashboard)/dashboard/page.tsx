@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { SignOutButton } from "@clerk/nextjs";
 import { useClerk } from "@clerk/nextjs";
-// =================== HEADER ===================
+
 const Header = () => {
   const { signOut } = useClerk();
   return (
@@ -49,17 +48,15 @@ const Header = () => {
     </header>
   );
 };
-
-// =================== DASHBOARD PAGE ===================
 export default function DashboardPage() {
   const [hideVideo, setHideVideo] = useState(false);
 
-  // ⭐ Hide scrollbar only on Dashboard load
+ 
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = "auto"; // reset when leaving dashboard
+      document.body.style.overflow = "auto"; 
     };
   }, []);
 

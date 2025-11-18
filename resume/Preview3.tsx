@@ -4,7 +4,6 @@ import React, { useRef, useCallback } from "react";
 import { ResumeData } from "@/lib/types2";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface PreviewProps {

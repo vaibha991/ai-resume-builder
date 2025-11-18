@@ -31,25 +31,62 @@ export default function ResumeForm({ resumeData, setResumeData }: ResumeFormProp
     projects: resumeData.projects ?? [],
   };
 
-  // Helper function for top-level field updates
-  const handleChange = (field: keyof ResumeData, value: any) =>
-    setResumeData(prev => ({ ...prev, [field]: value }));
+  // Update a single field (string, array, or object)
+  const handleChange = <K extends keyof ResumeData>(
+    field: K,
+    value: ResumeData[K]
+  ) => {
+    setResumeData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-  // Helper functions for array additions/removals are fine as you wrote them
-  const addArrayItem = (field: keyof ResumeData, defaultValue: any) => {
+  // Add an item to an array field
+  const addArrayItem = <
+    K extends keyof ResumeData,
+    T extends ResumeData[K] extends Array<infer U> ? U : never
+  >(
+    field: K,
+    defaultValue: T
+  ) => {
     setResumeData(prev => {
-      const arr = [...(prev[field] as any[] || []), defaultValue];
-      return { ...prev, [field]: arr };
+      const current = prev[field];
+
+      if (Array.isArray(current)) {
+        return {
+          ...prev,
+          [field]: [...current, defaultValue] as ResumeData[K],
+        };
+      }
+
+      console.error(`Field ${String(field)} is not an array`);
+      return prev;
     });
   };
 
-  const removeArrayItem = (field: keyof ResumeData, index: number) => {
+  // Remove item from an array field
+  const removeArrayItem = <K extends keyof ResumeData>(
+    field: K,
+    index: number
+  ) => {
     setResumeData(prev => {
-      const arr = [...(prev[field] as any[] || [])];
-      arr.splice(index, 1);
-      return { ...prev, [field]: arr };
+      const current = prev[field];
+
+      if (Array.isArray(current)) {
+        const updated = [...current];
+        updated.splice(index, 1);
+        return {
+          ...prev,
+          [field]: updated as ResumeData[K],
+        };
+      }
+
+      console.error(`Field ${String(field)} is not an array`);
+      return prev;
     });
   };
+
 
   // Handlers for specific array sections
 
@@ -424,7 +461,7 @@ export default function ResumeForm({ resumeData, setResumeData }: ResumeFormProp
       ))}
       <Button
         type="button"
-        onClick={() => addArrayItem("skills", { name: "", details: [] })}
+        onClick={() => addArrayItem("skills", { name: "", details: [], Frameworks: "" })}
       >
         Add Technical Skill Category
       </Button>

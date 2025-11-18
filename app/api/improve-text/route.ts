@@ -31,10 +31,10 @@ Text: "${text}"
     const improved = response.choices[0].message?.content ?? text;
 
     return NextResponse.json({ improved });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("OpenAI error:", error);
     return NextResponse.json(
-      { error: error.message || "AI request failed" },
+      { error: error instanceof Error ? error.message : "AI request failed" },
       { status: 500 }
     );
   }

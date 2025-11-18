@@ -4,7 +4,14 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ResumeData } from "@/lib/types2";
+import {
+  ResumeData,
+  Education,
+  Experience,
+  Project,
+  Certificate,
+  Skills,
+} from "@/lib/types2";
 
 interface FormProps {
   initialData?: ResumeData;
@@ -35,7 +42,7 @@ const emptyResume: ResumeData = {
     languages: "",
     platforms: "",
     tools: "",
-  }
+  },
 };
 
 export default function ResumeForm({ initialData, onChange, onSubmit }: FormProps) {
@@ -45,176 +52,263 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
     if (initialData) setForm(initialData);
   }, [initialData]);
 
-  const handleChange = (key: keyof ResumeData, value: any) => {
+  // -----------------------
+  // BASIC FIELD CHANGE
+  // -----------------------
+  const handleChange = <K extends keyof ResumeData>(key: K, value: ResumeData[K]) => {
     const updated = { ...form, [key]: value };
     setForm(updated);
     onChange(updated);
   };
 
-  const handleArrayChange = (
-    section: keyof ResumeData,
-    index: number,
-    field: string,
-    value: string
-  ) => {
-    const updatedSection = [...(form[section] as any[])];
-    updatedSection[index][field] = value;
-    const updated = { ...form, [section]: updatedSection };
-    setForm(updated);
-    onChange(updated);
-  };
+  // -----------------------
+  // SAFE ARRAY FIELD CHANGE
+  // -----------------------
+  // /C:/Users/ADMIN/Desktop/vs/New folder (3)/resume/ai-resume-builder/resume/Form3.tsx
 
-  const addArrayItem = (section: keyof ResumeData, empty: any) => {
-    const updated = { ...form, [section]: [...(form[section] as any[]), empty] };
-    setForm(updated);
-    onChange(updated);
-  };
+// ... (handleArrayChange generic definitions are correct)
 
+// -----------------------
+// SAFE ARRAY FIELD CHANGE
+// -----------------------
+const handleArrayChange = <
+  K extends keyof ResumeData,
+  T extends Record<string, any> & (ResumeData[K] extends Array<infer U> ? U : never)
+>(
+  section: K,
+  index: number,
+  field: keyof T,
+  value: any
+) => {
+  // FIX: Cast form[section] to 'unknown' first before casting to T[]
+  const current = Array.isArray(form[section]) ? (form[section] as unknown as T[]) : []; // <-- FIX LINE 81
+
+  const updatedArray = [...current];
+  updatedArray[index] = { ...updatedArray[index], [field]: value }; 
+
+  const updated = { ...form, [section]: updatedArray };
+  setForm(updated);
+  onChange(updated);
+};
+
+// ... (Other functions)
+
+// -----------------------
+// ADD NEW ITEM
+// -----------------------
+const addArrayItem = <
+  K extends keyof ResumeData,
+  T extends Record<string, any> & (ResumeData[K] extends Array<infer U> ? U : never)
+>(
+  section: K,
+  emptyItem: T
+) => {
+  // FIX: Cast form[section] to 'unknown' first before casting to T[]
+  const current = Array.isArray(form[section]) ? (form[section] as unknown as T[]) : []; // <-- FIX LINE 103
+  const updatedArray = [...current, emptyItem];
+
+  const updated = { ...form, [section]: updatedArray };
+  setForm(updated);
+  onChange(updated);
+};
   return (
     <div className="p-6 bg-white shadow-md rounded-lg max-w-3xl mx-auto space-y-6"
       style={{ fontFamily: "Calibri, Lato, sans-serif" }}
     >
 
-      {/* Basic Info */}
+      {/* BASIC INFO */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Basic Info</h2>
 
         <div className="grid grid-cols-2 gap-3">
-          <Input placeholder="Full Name" value={form.name} onChange={(e) => handleChange("name", e.target.value)} />
-          <Input placeholder="Email" value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
-          <Input placeholder="Phone" value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} />
-          <Input placeholder="LinkedIn URL" value={form.linkedin} onChange={(e) => handleChange("linkedin", e.target.value)} />
+          <Input placeholder="Full Name" value={form.name}
+            onChange={(e) => handleChange("name", e.target.value)} />
+
+          <Input placeholder="Email" value={form.email}
+            onChange={(e) => handleChange("email", e.target.value)} />
+
+          <Input placeholder="Phone" value={form.phone}
+            onChange={(e) => handleChange("phone", e.target.value)} />
+
+          <Input placeholder="LinkedIn URL" value={form.linkedin}
+            onChange={(e) => handleChange("linkedin", e.target.value)} />
         </div>
       </div>
 
-
-      {/* Education */}
+      {/* EDUCATION */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Education</h2>
+
         {form.education.map((edu, i) => (
           <div key={i} className="border p-3 rounded mb-3 space-y-2">
             <Input placeholder="Institute Name" value={edu.university}
               onChange={(e) => handleArrayChange("education", i, "university", e.target.value)} />
+
             <Input placeholder="Degree" value={edu.degree}
               onChange={(e) => handleArrayChange("education", i, "degree", e.target.value)} />
-            <Input placeholder="Location" value={edu.location || ""}
+
+            <Input placeholder="Location" value={edu.location}
               onChange={(e) => handleArrayChange("education", i, "location", e.target.value)} />
+
             <Input placeholder="Duration" value={edu.date}
               onChange={(e) => handleArrayChange("education", i, "date", e.target.value)} />
-            <Input placeholder="GPA" value={edu.gpa || ""}
+
+            <Input placeholder="GPA" value={edu.gpa}
               onChange={(e) => handleArrayChange("education", i, "gpa", e.target.value)} />
           </div>
         ))}
-        <Button onClick={() => addArrayItem("education", { university: "", degree: "", location: "", date: "", gpa: "" })}>
+
+        <Button
+          onClick={() =>
+            addArrayItem("education", {
+              university: "",
+              degree: "",
+              location: "",
+              date: "",
+              gpa: "",
+              emphasis: "",
+            })
+          }
+        >
           + Add Education
         </Button>
       </div>
 
-      {/* Skills Summary */}
+      {/* SKILLS SUMMARY */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Skills Summary</h2>
-        <h3 className="text-lg font-medium mb-1">Languages</h3>
-        <Textarea placeholder="Languages, Frameworks, Tools, Platforms"
-          value={form.skills.languages}
-          onChange={(e) => handleChange("skills", { ...form.skills, languages: e.target.value })}
-        />
 
-        <h3 className="text-lg font-medium mt-3 mb-1">Frameworks</h3>
-        <Textarea placeholder="Teamwork, Communication, Leadership"
-          value={form.skills.frameworks}
-          onChange={(e) => handleChange("skills", { ...form.skills, frameworks: e.target.value })}
-        />
+        <Textarea placeholder="Languages" value={form.skills.languages}
+          onChange={(e) => handleChange("skills", { ...form.skills, languages: e.target.value })} />
 
-        <h3 className="text-lg font-medium mt-3 mb-1">Tools</h3>
-        <Textarea placeholder="Teamwork, Communication, Leadership"
-          value={form.skills.tools}
-          onChange={(e) => handleChange("skills", { ...form.skills, tools: e.target.value })}
-        />
+        <Textarea placeholder="Frameworks" value={form.skills.frameworks}
+          onChange={(e) => handleChange("skills", { ...form.skills, frameworks: e.target.value })} />
 
-        <h3 className="text-lg font-medium mt-3 mb-1">Platforms</h3>
-        <Textarea placeholder="Teamwork, Communication, Leadership"
-          value={form.skills.platforms}
-          onChange={(e) => handleChange("skills", { ...form.skills, platforms: e.target.value })}
-        />
+        <Textarea placeholder="Tools" value={form.skills.tools}
+          onChange={(e) => handleChange("skills", { ...form.skills, tools: e.target.value })} />
 
-        <h3 className="text-lg font-medium mt-3 mb-1">Soft Skills</h3>
-        <Textarea placeholder="Teamwork, Communication, Leadership"
-          value={form.skills.soft}
-          onChange={(e) => handleChange("skills", { ...form.skills, soft: e.target.value })}
-        />
+        <Textarea placeholder="Platforms" value={form.skills.platforms}
+          onChange={(e) => handleChange("skills", { ...form.skills, platforms: e.target.value })} />
+
+        <Textarea placeholder="Soft Skills" value={form.skills.soft}
+          onChange={(e) => handleChange("skills", { ...form.skills, soft: e.target.value })} />
       </div>
 
-
-      {/* Work Experience */}
+      {/* EXPERIENCE */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Work Experience</h2>
+
         {form.experience.map((exp, i) => (
           <div key={i} className="border p-3 rounded mb-3 space-y-2">
             <Input placeholder="Position" value={exp.position}
               onChange={(e) => handleArrayChange("experience", i, "position", e.target.value)} />
+
             <Input placeholder="Company" value={exp.company}
               onChange={(e) => handleArrayChange("experience", i, "company", e.target.value)} />
+
             <Input placeholder="Location" value={exp.location}
               onChange={(e) => handleArrayChange("experience", i, "location", e.target.value)} />
+
             <Input placeholder="Duration" value={exp.duration}
               onChange={(e) => handleArrayChange("experience", i, "duration", e.target.value)} />
-            <Textarea placeholder="Responsibilities / Achievements"
-              value={exp.description}
-              onChange={(e) => handleArrayChange("experience", i, "description", e.target.value)}
-            />
+
+            <Textarea placeholder="Responsibilities" value={exp.description}
+              onChange={(e) => handleArrayChange("experience", i, "description", e.target.value)} />
           </div>
         ))}
-        <Button onClick={() =>
-          addArrayItem("experience", { position: "", company: "", location: "", duration: "", description: "" })
-        }>
+
+        <Button
+          onClick={() =>
+            addArrayItem("experience", {
+              position: "",
+              company: "",
+              location: "",
+              duration: "",
+              description: "",
+              role: "",
+              startDate: "",
+              endDate: "",
+            })
+          }
+        >
           + Add Experience
         </Button>
       </div>
 
-      {/* Projects */}
+      {/* PROJECTS */}
       <div>
         <h2 className="text-xl font-semibold border-b pb-2 mb-4">Projects</h2>
+
         {form.projects.map((proj, i) => (
           <div key={i} className="border p-3 rounded mb-3 space-y-2">
-            <Input placeholder="Project Title" value={proj.title}
-              onChange={(e) => handleArrayChange("projects", i, "title", e.target.value)} />
-            <Input placeholder="Duration" value={proj.duration}
-              onChange={(e) => handleArrayChange("projects", i, "duration", e.target.value)} />
-            <Textarea placeholder="Project Details"
-              value={proj.description}
-              onChange={(e) => handleArrayChange("projects", i, "description", e.target.value)}
-            />
+            <Input placeholder="Project Name" value={proj.name}
+              onChange={(e) => handleArrayChange("projects", i, "name", e.target.value)} />
+
+            <Input placeholder="Tech Stack" value={proj.tech}
+              onChange={(e) => handleArrayChange("projects", i, "tech", e.target.value)} />
+
+            <Textarea placeholder="Project Description" value={proj.description}
+              onChange={(e) => handleArrayChange("projects", i, "description", e.target.value)} />
           </div>
         ))}
-        <Button onClick={() => addArrayItem("projects", { name: "", date: "", description: "" })}>
+
+        <Button
+          onClick={() =>
+            addArrayItem("projects", {
+              name: "",
+              tech: "",
+              description: "",
+              duration: "",
+              position: "",
+              date: "",
+              title: "",
+            })
+          }
+        >
           + Add Project
         </Button>
       </div>
 
-      {/* Certificates */}
+      {/* CERTIFICATES */}
       <div>
-        <h2 className="text-xl font-semibold border-b pb-2 mb-4">Certificate</h2>
-        {form.certificates?.map((cert, i) => (
-          <div key={i} className="border p-3 rounded mb-3">
+        <h2 className="text-xl font-semibold border-b pb-2 mb-4">Certificates</h2>
+
+        {form.certificates.map((cert, i) => (
+          <div key={i} className="border p-3 rounded mb-3 space-y-2">
             <Input placeholder="Certificate Title" value={cert.title}
               onChange={(e) => handleArrayChange("certificates", i, "title", e.target.value)} />
-            <Input placeholder="Issued Date" value={cert.date}
+
+            <Input placeholder="Issuer" value={cert.issuer}
+              onChange={(e) => handleArrayChange("certificates", i, "issuer", e.target.value)} />
+
+            <Input placeholder="Issue Date" value={cert.date}
               onChange={(e) => handleArrayChange("certificates", i, "date", e.target.value)} />
-            <Textarea placeholder="Certificate"
-              value={cert.description}
-              onChange={(e) => handleArrayChange("certificates", i, "description", e.target.value)}
-            />
+
+            <Textarea placeholder="About Certificate" value={cert.description}
+              onChange={(e) => handleArrayChange("certificates", i, "description", e.target.value)} />
           </div>
         ))}
-        <Button onClick={() => addArrayItem("certificates", { title: "", date: "" })}>
+
+        <Button
+          onClick={() =>
+            addArrayItem("certificates", {
+              title: "",
+              issuer: "",
+              date: "",
+              description: "",
+            })
+          }
+        >
           + Add Certificate
         </Button>
       </div>
 
-      {/* Submit */}
+      {/* SUBMIT */}
       <Button onClick={() => onSubmit(form)} className="w-full bg-blue-600 text-white">
         Save Resume
       </Button>
     </div>
   );
 }
+
+

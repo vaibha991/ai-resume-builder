@@ -7,6 +7,24 @@ import { Button } from "@/components/ui/button";
 import { ResumeData, Skill, Project, Experience, Education } from "@/lib/types1";
 import { improveText } from "@/lib/ai";
 
+// --- Utility Types (for type-safe array handling) ---
+// Define the keys that hold arrays of objects or strings in ResumeData.
+type ArraySectionKey = 'experience' | 'education' | 'projects' | 'skills' | 'interests' | 'languages' | 'achievement' | 'relevantCoursework';
+
+// Mapped type to get the item type from an ArraySectionKey
+type ArrayItem<K extends ArraySectionKey> = 
+  K extends 'experience' ? Experience :
+  K extends 'education' ? Education :
+  K extends 'projects' ? Project :
+  K extends 'skills' ? Skill :
+  // Keys that hold string arrays:
+  K extends 'interests' ? string : 
+  K extends 'languages' ? string : 
+  K extends 'achievement' ? string :
+  K extends 'relevantCoursework' ? string : 
+  never;
+// -----------------------------------------------------
+
 interface FormProps {
   initialData: ResumeData;
   onChange: (updatedData: ResumeData) => void;
@@ -25,33 +43,52 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
   // --- Handle text inputs ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const updated = { ...formData, [name]: value };
+    // We assert [name] is a valid key of ResumeData for type safety
+    const updated: ResumeData = { ...formData, [name]: value }; 
     setFormData(updated);
     onChange(updated);
   };
 
-  // --- Handle array fields like education, experience, etc. ---
-  const handleArrayChange = (
-    section: keyof ResumeData,
+  const handleArrayChange = <
+    K extends 'education' | 'experience' | 'projects' | 'skills',
+    T extends ArrayItem<K>
+  >(
+    section: K, 
     index: number,
-    field: string,
+    field: keyof T, // This is type-safe: only allows keys from the specific item type
     value: string
   ) => {
-    if (Array.isArray(formData[section])) {
-      const updatedArray = [...(formData[section] as any[])];
-      updatedArray[index] = { ...updatedArray[index], [field]: value };
-      const updated = { ...formData, [section]: updatedArray as any };
+    const sectionArray = formData[section];
+
+    if (Array.isArray(sectionArray)) {
+      const updatedArray = [...(sectionArray as T[])];
+      
+      updatedArray[index] = { ...updatedArray[index] as Record<string, any>, [field]: value } as T;
+      
+      const updated: ResumeData = { ...formData, [section]: updatedArray };
       setFormData(updated);
       onChange(updated);
     }
   };
 
-  // --- Add new section item ---
-  const addNewField = (section: keyof ResumeData, emptyTemplate: any) => {
-    if (Array.isArray(formData[section])) {
-      const updated = {
+
+
+  const addNewField = <
+    K extends ArraySectionKey,
+    T extends ArrayItem<K>
+  >(
+    section: K, 
+    emptyTemplate: T // Template must match the specific item type T
+  ) => {
+    const sectionArray = formData[section];
+    
+    if (Array.isArray(sectionArray)) {
+      // Append the new template, which is now of type T
+      const updatedArray = [...(sectionArray as T[]), emptyTemplate];
+      
+      const updated: ResumeData = {
         ...formData,
-        [section]: [...(formData[section] as any[]), emptyTemplate],
+        [section]: updatedArray,
       };
       setFormData(updated);
       onChange(updated);
@@ -104,7 +141,7 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     try {
       setLoading(true);
       const improved = await improveText(formData.summary, "summary");
-      const updated = { ...formData, summary: improved };
+      const updated: ResumeData = { ...formData, summary: improved };
       setFormData(updated);
       onChange(updated);
     } catch (error) {
@@ -290,9 +327,14 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
       </div>
 
 
-
+      {/* Relevant Coursework (String Array) */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Relevant Coursework</h3>
+        {/*
+          NOTE: Direct state update is used here because it's a simple string array.
+          If you wanted to use a generic handler, you'd use addNewField for adding and 
+          a dedicated handler or a modified handleArrayChange for updating/deleting.
+        */}
         {formData.relevantCoursework?.map((course, index) => (
           <div key={index} className="flex items-center gap-2">
             <Input
@@ -301,8 +343,9 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
               onChange={(e) => {
                 const updatedCourses = [...(formData.relevantCoursework || [])];
                 updatedCourses[index] = e.target.value;
-                setFormData({ ...formData, relevantCoursework: updatedCourses });
-                onChange({ ...formData, relevantCoursework: updatedCourses });
+                const updated: ResumeData = { ...formData, relevantCoursework: updatedCourses };
+                setFormData(updated);
+                onChange(updated);
               }}
             />
             <Button
@@ -310,8 +353,9 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
               onClick={() => {
                 const updatedCourses = [...(formData.relevantCoursework || [])];
                 updatedCourses.splice(index, 1);
-                setFormData({ ...formData, relevantCoursework: updatedCourses });
-                onChange({ ...formData, relevantCoursework: updatedCourses });
+                const updated: ResumeData = { ...formData, relevantCoursework: updatedCourses };
+                setFormData(updated);
+                onChange(updated);
               }}
             >
               Delete
@@ -320,38 +364,37 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
         ))}
         <Button
           type="button"
-          onClick={() =>
-            setFormData({
-              ...formData,
-              relevantCoursework: [...(formData.relevantCoursework || []), ""]
-            })
-          }
+          // Uses the generic addNewField, passing 'relevantCoursework' as K and '' as T
+          onClick={() => addNewField("relevantCoursework", "")}
         >
           + Add Coursework
         </Button>
       </div>
 
+      {/* Achievement (String Array) */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Achievement</h3>
-        {formData.achievement?.map((course, index) => (
+        {formData.achievement?.map((ach, index) => (
           <div key={index} className="flex items-center gap-2">
             <Input
-              placeholder={`Course ${index + 1}`}
-              value={course}
+              placeholder={`Achievement ${index + 1}`}
+              value={ach}
               onChange={(e) => {
-                const updatedCourses = [...(formData.achievement || [])];
-                updatedCourses[index] = e.target.value;
-                setFormData({ ...formData, achievement: updatedCourses });
-                onChange({ ...formData, achievement: updatedCourses });
+                const updatedAchievements = [...(formData.achievement || [])];
+                updatedAchievements[index] = e.target.value;
+                const updated: ResumeData = { ...formData, achievement: updatedAchievements };
+                setFormData(updated);
+                onChange(updated);
               }}
             />
             <Button
               type="button"
               onClick={() => {
-                const updatedCourses = [...(formData.achievement || [])];
-                updatedCourses.splice(index, 1);
-                setFormData({ ...formData, achievement: updatedCourses });
-                onChange({ ...formData, achievement: updatedCourses });
+                const updatedAchievements = [...(formData.achievement || [])];
+                updatedAchievements.splice(index, 1);
+                const updated: ResumeData = { ...formData, achievement: updatedAchievements };
+                setFormData(updated);
+                onChange(updated);
               }}
             >
               Delete
@@ -360,18 +403,18 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
         ))}
         <Button
           type="button"
-          onClick={() =>
-            setFormData({
-              ...formData,
-              achievement: [...(formData.achievement || []), ""]
-            })
-          }
+          // Uses the generic addNewField, passing 'achievement' as K and '' as T
+          onClick={() => addNewField("achievement", "")}
         >
-          + Add Coursework
+          + Add Achievement
         </Button>
       </div>
 
-      {/* Skills */}
+      {/* Skills (Complex Object Array) */}
+      {/* NOTE: Since the 'skills' array in your ResumeData only holds a single Skill object 
+        (Skill[]), the map loop only runs once (i=0). This structure is unusual for skills, 
+        but the code handles it correctly using handleArrayChange.
+      */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold">Skills</h3>
         {formData.skills.map((skill, i) => (
@@ -406,10 +449,11 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
                 }
               />
             </div>
+            {/* ... other skill fields here ... */}
           </div>
         ))}
         <Button type="button" onClick={() => addNewField("skills", emptySkill)}>
-          + Add Skill
+          + Add Skill Set
         </Button>
       </div>
 

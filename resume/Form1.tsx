@@ -13,43 +13,66 @@ interface FormProps {
   isNew?: boolean;
 }
 
+// Utility type to define keys that hold arrays of objects (not strings)
+type ObjectArrayKey = 'skills' | 'experience' | 'education' | 'projects';
+// Utility type to define keys that hold arrays of strings
+type StringArrayKey = 'relevantCoursework' | 'interests' | 'languages' | 'achievement';
+
 export default function Form({ initialData, onChange, onSubmit, isNew }: FormProps) {
   const [formData, setFormData] = useState<ResumeData>(initialData);
 
-  const handleChange = (field: keyof ResumeData, value: any) => {
-    const updatedData = { ...formData, [field]: value };
+  // 1. Fixed: Removed 'any' from value parameter. Now explicitly typed as 'unknown' 
+  //    or a more permissive type that is safe to use in the setter.
+  const handleChange = (field: keyof ResumeData, value: unknown) => {
+    // We trust that the value provided matches the type of formData[field]
+    const updatedData: ResumeData = { ...formData, [field]: value as any };
     setFormData(updatedData);
     onChange(updatedData);
   };
 
-  const handleArrayChange = <T,>(field: keyof ResumeData, index: number, key: keyof T, value: any) => {
-    const updatedArray = [...(formData[field] as T[])];
-    (updatedArray[index] as any)[key] = value;
+  const handleArrayChange = <T extends Record<string, unknown>>(
+    field: ObjectArrayKey,
+    index: number,
+    key: keyof T,
+    value: unknown
+  ) => {
+    const updatedArray = [...(formData[field] as unknown as T[])];
+
+    updatedArray[index] = {
+      ...updatedArray[index],
+      [key]: value
+    } as T;
+
     handleChange(field, updatedArray);
   };
 
-  const handleAddItem = <T,>(field: keyof ResumeData, emptyItem: T) => {
+
+  // Type safe function to add a new item
+  const handleAddItem = <T,>(field: ObjectArrayKey, emptyItem: T) => {
     const updatedArray = [...(formData[field] as T[]), emptyItem];
     handleChange(field, updatedArray);
   };
 
-  const handleRemoveItem = (field: keyof ResumeData, index: number) => {
-    const updatedArray = (formData[field] as any[]).filter((_, i) => i !== index);
+  // 3. Fixed: Replaced 'any[]' with generic T[].
+  const handleRemoveItem = <T,>(field: ObjectArrayKey, index: number) => {
+    // Assert the field as an array of the generic type T
+    const updatedArray = (formData[field] as T[]).filter((_, i) => i !== index);
     handleChange(field, updatedArray);
   };
 
-  const handleArrayFieldChange = (field: keyof ResumeData, index: number, value: string) => {
+  // String Array Handlers (already mostly type-safe, but using StringArrayKey for clarity)
+  const handleArrayFieldChange = (field: StringArrayKey, index: number, value: string) => {
     const updatedArray = [...(formData[field] as string[])];
     updatedArray[index] = value;
     handleChange(field, updatedArray);
   };
 
-  const handleAddArrayItem = (field: keyof ResumeData) => {
+  const handleAddArrayItem = (field: StringArrayKey) => {
     const updatedArray = [...(formData[field] as string[]), ""];
     handleChange(field, updatedArray);
   };
 
-  const handleRemoveArrayItem = (field: keyof ResumeData, index: number) => {
+  const handleRemoveArrayItem = (field: StringArrayKey, index: number) => {
     const updatedArray = (formData[field] as string[]).filter((_, i) => i !== index);
     handleChange(field, updatedArray);
   };
@@ -84,7 +107,7 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
             <Input placeholder="Languages" value={skill.languages} onChange={(e) => handleArrayChange<Skill>("skills", i, "languages", e.target.value)} />
             <Input placeholder="Frameworks" value={skill.frameworks} onChange={(e) => handleArrayChange<Skill>("skills", i, "frameworks", e.target.value)} />
             <Input placeholder="Cloud/Database" value={skill.cloud} onChange={(e) => handleArrayChange<Skill>("skills", i, "cloud", e.target.value)} />
-            <Button type="button" variant="destructive" onClick={() => handleRemoveItem("skills", i)}>Remove</Button>
+            <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Skill>("skills", i)}>Remove</Button>
           </div>
         ))}
         <Button type="button" onClick={() => handleAddItem<Skill>("skills", { languages: "", frameworks: "", cloud: "", database: "", programming: "", operating: "", software: "" })}>
@@ -101,10 +124,10 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
             <Input placeholder="Position" value={exp.position} onChange={(e) => handleArrayChange<Experience>("experience", i, "position", e.target.value)} />
             <Input placeholder="Duration" value={exp.duration} onChange={(e) => handleArrayChange<Experience>("experience", i, "duration", e.target.value)} />
             <Textarea placeholder="Description" value={exp.description} onChange={(e) => handleArrayChange<Experience>("experience", i, "description", e.target.value)} />
-            <Button type="button" variant="destructive" onClick={() => handleRemoveItem("experience", i)}>Remove</Button>
+            <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Experience>("experience", i)}>Remove</Button>
           </div>
         ))}
-        <Button type="button" onClick={() => handleAddItem<Experience>("experience", { company: "", position: "", duration: "", description: "", location:""})}>
+        <Button type="button" onClick={() => handleAddItem<Experience>("experience", { company: "", position: "", duration: "", description: "", location: "" })}>
           Add Experience
         </Button>
       </div>
@@ -121,7 +144,7 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
             <Input placeholder="Field of Study" value={edu.fieldOfStudy} onChange={(e) => handleArrayChange<Education>("education", i, "fieldOfStudy", e.target.value)} />
             <Input placeholder="Date" value={edu.date} onChange={(e) => handleArrayChange<Education>("education", i, "date", e.target.value)} />
             <Input placeholder="GPA" value={edu.gpa} onChange={(e) => handleArrayChange<Education>("education", i, "gpa", e.target.value)} />
-            <Button type="button" variant="destructive" onClick={() => handleRemoveItem("education", i)}>Remove</Button>
+            <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Education>("education", i)}>Remove</Button>
           </div>
         ))}
         <Button
@@ -140,7 +163,7 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
             <Input placeholder="Project Name" value={project.name} onChange={(e) => handleArrayChange<Project>("projects", i, "name", e.target.value)} />
             <Textarea placeholder="Description" value={project.description} onChange={(e) => handleArrayChange<Project>("projects", i, "description", e.target.value)} />
             <Input placeholder="Tech Stack" value={project.tech} onChange={(e) => handleArrayChange<Project>("projects", i, "tech", e.target.value)} />
-            <Button type="button" variant="destructive" onClick={() => handleRemoveItem("projects", i)}>Remove</Button>
+            <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Project>("projects", i)}>Remove</Button>
           </div>
         ))}
         <Button type="button" onClick={() => handleAddItem<Project>("projects", { name: "", description: "", tech: "" })}>
@@ -153,6 +176,7 @@ export default function Form({ initialData, onChange, onSubmit, isNew }: FormPro
         <h2 className="text-xl font-bold mb-2">Achievements</h2>
         {formData.achievement.map((ach, i) => (
           <div key={i} className="flex items-center space-x-2">
+            {/* These use handleArrayFieldChange for string arrays */}
             <Input placeholder={`Achievement ${i + 1}`} value={ach} onChange={(e) => handleArrayFieldChange("achievement", i, e.target.value)} />
             <Button type="button" variant="destructive" onClick={() => handleRemoveArrayItem("achievement", i)}>Remove</Button>
           </div>
