@@ -1,3 +1,195 @@
+// "use client";
+
+// import React, { useState } from "react";
+// import { Input } from "@/components/ui/input";
+// import { Textarea } from "@/components/ui/textarea";
+// import { Button } from "@/components/ui/button";
+// import { ResumeData, Skill, Project, Experience, Education } from "@/lib/types1";
+
+// interface FormProps {
+//   initialData: ResumeData;
+//   onChange: (updatedData: ResumeData) => void;
+//   onSubmit: (data: ResumeData) => void;
+//   isNew?: boolean;
+// }
+
+// // Utility type to define keys that hold arrays of objects (not strings)
+// type ObjectArrayKey = 'skills' | 'experience' | 'education' | 'projects';
+// // Utility type to define keys that hold arrays of strings
+// type StringArrayKey = 'relevantCoursework' | 'interests' | 'languages' | 'achievement';
+
+// export default function Form({ initialData, onChange, onSubmit, isNew }: FormProps) {
+//   const [formData, setFormData] = useState<ResumeData>(initialData);
+
+//   // 1. Fixed: Removed 'any' from value parameter. Now explicitly typed as 'unknown' 
+//   //    or a more permissive type that is safe to use in the setter.
+//   const handleChange = (field: keyof ResumeData, value: unknown) => {
+//     // We trust that the value provided matches the type of formData[field]
+//     const updatedData: ResumeData = { ...formData, [field]: value as any };
+//     setFormData(updatedData);
+//     onChange(updatedData);
+//   };
+
+//   const handleArrayChange = <T extends Record<string, unknown>>(
+//     field: ObjectArrayKey,
+//     index: number,
+//     key: keyof T,
+//     value: unknown
+//   ) => {
+//     const updatedArray = [...(formData[field] as unknown as T[])];
+
+//     updatedArray[index] = {
+//       ...updatedArray[index],
+//       [key]: value
+//     } as T;
+
+//     handleChange(field, updatedArray);
+//   };
+
+
+//   // Type safe function to add a new item
+//   const handleAddItem = <T,>(field: ObjectArrayKey, emptyItem: T) => {
+//     const updatedArray = [...(formData[field] as T[]), emptyItem];
+//     handleChange(field, updatedArray);
+//   };
+
+//   // 3. Fixed: Replaced 'any[]' with generic T[].
+//   const handleRemoveItem = <T,>(field: ObjectArrayKey, index: number) => {
+//     // Assert the field as an array of the generic type T
+//     const updatedArray = (formData[field] as T[]).filter((_, i) => i !== index);
+//     handleChange(field, updatedArray);
+//   };
+
+//   // String Array Handlers (already mostly type-safe, but using StringArrayKey for clarity)
+//   const handleArrayFieldChange = (field: StringArrayKey, index: number, value: string) => {
+//     const updatedArray = [...(formData[field] as string[])];
+//     updatedArray[index] = value;
+//     handleChange(field, updatedArray);
+//   };
+
+//   const handleAddArrayItem = (field: StringArrayKey) => {
+//     const updatedArray = [...(formData[field] as string[]), ""];
+//     handleChange(field, updatedArray);
+//   };
+
+//   const handleRemoveArrayItem = (field: StringArrayKey, index: number) => {
+//     const updatedArray = (formData[field] as string[]).filter((_, i) => i !== index);
+//     handleChange(field, updatedArray);
+//   };
+
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     onSubmit(formData);
+//   };
+
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-6">
+//       {/* Basic Info */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Basic Information</h2>
+//         <Input placeholder="Name" value={formData.name} onChange={(e) => handleChange("name", e.target.value)} />
+//         <Input placeholder="Job-Title" value={formData.jobtitle} onChange={(e) => handleChange("jobtitle", e.target.value)} />
+//         <Input placeholder="Email" value={formData.email} onChange={(e) => handleChange("email", e.target.value)} />
+//         <Input placeholder="Phone" value={formData.phone} onChange={(e) => handleChange("phone", e.target.value)} />
+//         <Input placeholder="Location" value={formData.location} onChange={(e) => handleChange("location", e.target.value)} />
+//         <Input placeholder="LinkedIn" value={formData.linkedin} onChange={(e) => handleChange("linkedin", e.target.value)} />
+//         <Input placeholder="Title" value={formData.title} onChange={(e) => handleChange("title", e.target.value)} />
+//         <Input placeholder="Degree" value={formData.degree} onChange={(e) => handleChange("degree", e.target.value)} />
+//         <Input placeholder="GitHub" value={formData.github} onChange={(e) => handleChange("github", e.target.value)} />
+//         <Textarea placeholder="Summary" value={formData.summary} onChange={(e) => handleChange("summary", e.target.value)} />
+//       </div>
+
+//       {/* Skills */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Skills</h2>
+//         {formData.skills.map((skill, i) => (
+//           <div key={i} className="space-y-2">
+//             <Input placeholder="Languages" value={skill.languages} onChange={(e) => handleArrayChange<Skill>("skills", i, "languages", e.target.value)} />
+//             <Input placeholder="Frameworks" value={skill.frameworks} onChange={(e) => handleArrayChange<Skill>("skills", i, "frameworks", e.target.value)} />
+//             <Input placeholder="Cloud/Database" value={skill.cloud} onChange={(e) => handleArrayChange<Skill>("skills", i, "cloud", e.target.value)} />
+//             <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Skill>("skills", i)}>Remove</Button>
+//           </div>
+//         ))}
+//         <Button type="button" onClick={() => handleAddItem<Skill>("skills", { languages: "", frameworks: "", cloud: "", database: "", programming: "", operating: "", software: "" })}>
+//           Add Skill
+//         </Button>
+//       </div>
+
+//       {/* Experience */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Experience</h2>
+//         {formData.experience.map((exp, i) => (
+//           <div key={i} className="space-y-2">
+//             <Input placeholder="Company" value={exp.company} onChange={(e) => handleArrayChange<Experience>("experience", i, "company", e.target.value)} />
+//             <Input placeholder="Position" value={exp.position} onChange={(e) => handleArrayChange<Experience>("experience", i, "position", e.target.value)} />
+//             <Input placeholder="Duration" value={exp.duration} onChange={(e) => handleArrayChange<Experience>("experience", i, "duration", e.target.value)} />
+//             <Textarea placeholder="Description" value={exp.description} onChange={(e) => handleArrayChange<Experience>("experience", i, "description", e.target.value)} />
+//             <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Experience>("experience", i)}>Remove</Button>
+//           </div>
+//         ))}
+//         <Button type="button" onClick={() => handleAddItem<Experience>("experience", { company: "", position: "", duration: "", description: "", location: "" })}>
+//           Add Experience
+//         </Button>
+//       </div>
+
+//       {/* Education */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Education</h2>
+//         {formData.education.map((edu, i) => (
+//           <div key={i} className="space-y-2">
+//             <Input placeholder="University" value={edu.university} onChange={(e) => handleArrayChange<Education>("education", i, "university", e.target.value)} />
+//             <Input placeholder="Degree" value={edu.degree} onChange={(e) => handleArrayChange<Education>("education", i, "degree", e.target.value)} />
+//             <Input placeholder="Emphasis" value={edu.emphasis} onChange={(e) => handleArrayChange<Education>("education", i, "emphasis", e.target.value)} />
+//             <Input placeholder="Location" value={edu.location} onChange={(e) => handleArrayChange<Education>("education", i, "location", e.target.value)} />
+//             <Input placeholder="Field of Study" value={edu.fieldOfStudy} onChange={(e) => handleArrayChange<Education>("education", i, "fieldOfStudy", e.target.value)} />
+//             <Input placeholder="Date" value={edu.date} onChange={(e) => handleArrayChange<Education>("education", i, "date", e.target.value)} />
+//             <Input placeholder="GPA" value={edu.gpa} onChange={(e) => handleArrayChange<Education>("education", i, "gpa", e.target.value)} />
+//             <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Education>("education", i)}>Remove</Button>
+//           </div>
+//         ))}
+//         <Button
+//           type="button"
+//           onClick={() => handleAddItem<Education>("education", { university: "", degree: "", emphasis: "", location: "", fieldOfStudy: "", date: "", gpa: "" })}
+//         >
+//           Add Education
+//         </Button>
+//       </div>
+
+//       {/* Projects */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Projects</h2>
+//         {formData.projects.map((project, i) => (
+//           <div key={i} className="space-y-2">
+//             <Input placeholder="Project Name" value={project.name} onChange={(e) => handleArrayChange<Project>("projects", i, "name", e.target.value)} />
+//             <Textarea placeholder="Description" value={project.description} onChange={(e) => handleArrayChange<Project>("projects", i, "description", e.target.value)} />
+//             <Input placeholder="Tech Stack" value={project.tech} onChange={(e) => handleArrayChange<Project>("projects", i, "tech", e.target.value)} />
+//             <Button type="button" variant="destructive" onClick={() => handleRemoveItem<Project>("projects", i)}>Remove</Button>
+//           </div>
+//         ))}
+//         <Button type="button" onClick={() => handleAddItem<Project>("projects", { name: "", description: "", tech: "" })}>
+//           Add Project
+//         </Button>
+//       </div>
+
+//       {/* Achievements */}
+//       <div>
+//         <h2 className="text-xl font-bold mb-2">Achievements</h2>
+//         {formData.achievement.map((ach, i) => (
+//           <div key={i} className="flex items-center space-x-2">
+//             {/* These use handleArrayFieldChange for string arrays */}
+//             <Input placeholder={`Achievement ${i + 1}`} value={ach} onChange={(e) => handleArrayFieldChange("achievement", i, e.target.value)} />
+//             <Button type="button" variant="destructive" onClick={() => handleRemoveArrayItem("achievement", i)}>Remove</Button>
+//           </div>
+//         ))}
+//         <Button type="button" onClick={() => handleAddArrayItem("achievement")}>Add Achievement</Button>
+//       </div>
+
+//       <Button type="submit">{isNew ? "Create Resume" : "Update Resume"}</Button>
+//     </form>
+//   );
+// }
+
+
 "use client";
 
 import React, { useState } from "react";
@@ -13,68 +205,62 @@ interface FormProps {
   isNew?: boolean;
 }
 
-// Utility type to define keys that hold arrays of objects (not strings)
+type ArrayItem = Skill | Experience | Education | Project;
+
 type ObjectArrayKey = 'skills' | 'experience' | 'education' | 'projects';
-// Utility type to define keys that hold arrays of strings
+
 type StringArrayKey = 'relevantCoursework' | 'interests' | 'languages' | 'achievement';
 
 export default function Form({ initialData, onChange, onSubmit, isNew }: FormProps) {
   const [formData, setFormData] = useState<ResumeData>(initialData);
 
-  // 1. Fixed: Removed 'any' from value parameter. Now explicitly typed as 'unknown' 
-  //    or a more permissive type that is safe to use in the setter.
-  const handleChange = (field: keyof ResumeData, value: unknown) => {
-    // We trust that the value provided matches the type of formData[field]
-    const updatedData: ResumeData = { ...formData, [field]: value as any };
+  const handleChange = <K extends keyof ResumeData>(field: K, value: ResumeData[K]) => {
+    const updatedData: ResumeData = { ...formData, [field]: value };
     setFormData(updatedData);
     onChange(updatedData);
   };
 
-  const handleArrayChange = <T extends Record<string, unknown>>(
+  const handleArrayChange = <T extends ArrayItem>( 
     field: ObjectArrayKey,
     index: number,
     key: keyof T,
     value: unknown
   ) => {
+    
     const updatedArray = [...(formData[field] as unknown as T[])];
 
     updatedArray[index] = {
       ...updatedArray[index],
       [key]: value
-    } as T;
-
-    handleChange(field, updatedArray);
+    } as T;  
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
 
-  // Type safe function to add a new item
-  const handleAddItem = <T,>(field: ObjectArrayKey, emptyItem: T) => {
-    const updatedArray = [...(formData[field] as T[]), emptyItem];
-    handleChange(field, updatedArray);
+  const handleAddItem = <T extends ArrayItem>(field: ObjectArrayKey, emptyItem: T) => {
+    const updatedArray = [...(formData[field] as unknown as T[]), emptyItem]; 
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
-  // 3. Fixed: Replaced 'any[]' with generic T[].
-  const handleRemoveItem = <T,>(field: ObjectArrayKey, index: number) => {
-    // Assert the field as an array of the generic type T
-    const updatedArray = (formData[field] as T[]).filter((_, i) => i !== index);
-    handleChange(field, updatedArray);
+  const handleRemoveItem = <T extends ArrayItem>(field: ObjectArrayKey, index: number) => {
+    const updatedArray = (formData[field] as unknown as T[]).filter((_, i) => i !== index);
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
-  // String Array Handlers (already mostly type-safe, but using StringArrayKey for clarity)
   const handleArrayFieldChange = (field: StringArrayKey, index: number, value: string) => {
     const updatedArray = [...(formData[field] as string[])];
     updatedArray[index] = value;
-    handleChange(field, updatedArray);
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
   const handleAddArrayItem = (field: StringArrayKey) => {
     const updatedArray = [...(formData[field] as string[]), ""];
-    handleChange(field, updatedArray);
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
   const handleRemoveArrayItem = (field: StringArrayKey, index: number) => {
     const updatedArray = (formData[field] as string[]).filter((_, i) => i !== index);
-    handleChange(field, updatedArray);
+    handleChange(field, updatedArray as unknown as ResumeData[typeof field]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

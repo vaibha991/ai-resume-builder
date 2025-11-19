@@ -2,12 +2,7 @@
 import OpenAI from "openai";
 
 const isServer = typeof window === "undefined";
-
-/**
- * Improve text using AI.
- * - On the server: calls OpenAI directly.
- * - On the client: calls the API route.
- */
+ 
 export async function improveText(text: string, section?: "jobTitle" | "summary" | "experience" | "project") {
   try {
     // Generate prompt based on section

@@ -4,14 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  ResumeData,
-  Education,
-  Experience,
-  Project,
-  Certificate,
-  Skills,
-} from "@/lib/types2";
+import { ResumeData } from "@/lib/types2";
 
 interface FormProps {
   initialData?: ResumeData;
@@ -52,65 +45,55 @@ export default function ResumeForm({ initialData, onChange, onSubmit }: FormProp
     if (initialData) setForm(initialData);
   }, [initialData]);
 
-  // -----------------------
-  // BASIC FIELD CHANGE
-  // -----------------------
+
   const handleChange = <K extends keyof ResumeData>(key: K, value: ResumeData[K]) => {
     const updated = { ...form, [key]: value };
     setForm(updated);
     onChange(updated);
   };
 
-  // -----------------------
-  // SAFE ARRAY FIELD CHANGE
-  // -----------------------
-  // /C:/Users/ADMIN/Desktop/vs/New folder (3)/resume/ai-resume-builder/resume/Form3.tsx
+  const handleArrayChange = <
+    K extends keyof ResumeData,
+    T extends Record<string, unknown> &
+    (ResumeData[K] extends Array<infer U> ? U : never)
+  >(
+    section: K,
+    index: number,
+    field: keyof T,
+    value: unknown
+  ) => {
+    const current = Array.isArray(form[section])
+      ? (form[section] as unknown as T[])
+      : [];
 
-// ... (handleArrayChange generic definitions are correct)
+    const updatedArray = [...current];
+    updatedArray[index] = { ...updatedArray[index], [field]: value };
 
-// -----------------------
-// SAFE ARRAY FIELD CHANGE
-// -----------------------
-const handleArrayChange = <
-  K extends keyof ResumeData,
-  T extends Record<string, any> & (ResumeData[K] extends Array<infer U> ? U : never)
->(
-  section: K,
-  index: number,
-  field: keyof T,
-  value: any
-) => {
-  // FIX: Cast form[section] to 'unknown' first before casting to T[]
-  const current = Array.isArray(form[section]) ? (form[section] as unknown as T[]) : []; // <-- FIX LINE 81
+    const updated = { ...form, [section]: updatedArray };
+    setForm(updated);
+    onChange(updated);
+  };
 
-  const updatedArray = [...current];
-  updatedArray[index] = { ...updatedArray[index], [field]: value }; 
 
-  const updated = { ...form, [section]: updatedArray };
-  setForm(updated);
-  onChange(updated);
-};
+  const addArrayItem = <
+    K extends keyof ResumeData,
+    T extends Record<string, unknown> &
+    (ResumeData[K] extends Array<infer U> ? U : never)
+  >(
+    section: K,
+    emptyItem: T
+  ) => {
+    const current = Array.isArray(form[section])
+      ? (form[section] as unknown as T[])
+      : [];
 
-// ... (Other functions)
+    const updatedArray = [...current, emptyItem];
 
-// -----------------------
-// ADD NEW ITEM
-// -----------------------
-const addArrayItem = <
-  K extends keyof ResumeData,
-  T extends Record<string, any> & (ResumeData[K] extends Array<infer U> ? U : never)
->(
-  section: K,
-  emptyItem: T
-) => {
-  // FIX: Cast form[section] to 'unknown' first before casting to T[]
-  const current = Array.isArray(form[section]) ? (form[section] as unknown as T[]) : []; // <-- FIX LINE 103
-  const updatedArray = [...current, emptyItem];
+    const updated = { ...form, [section]: updatedArray };
+    setForm(updated);
+    onChange(updated);
+  };
 
-  const updated = { ...form, [section]: updatedArray };
-  setForm(updated);
-  onChange(updated);
-};
   return (
     <div className="p-6 bg-white shadow-md rounded-lg max-w-3xl mx-auto space-y-6"
       style={{ fontFamily: "Calibri, Lato, sans-serif" }}

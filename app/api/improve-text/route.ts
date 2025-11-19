@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Must be set in .env.local
+  apiKey: process.env.OPENAI_API_KEY, 
 });
 
 export async function POST(req: Request) {

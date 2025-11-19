@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ResumeData, Skill, Experience, Education, Project } from "@/lib/types1";
 import { improveText } from "@/lib/ai";
+import Image from "next/image";
 
 interface FormProps {
     initialData: ResumeData;
@@ -24,9 +25,7 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
         setForm(initialData);
     }, [initialData]);
 
-    // ---------------------------------------------------------
-    // 1️⃣ Safe handleChange (NO ANY)
-    // ---------------------------------------------------------
+  
     const handleChange = <K extends keyof ResumeData>(
         key: K,
         value: ResumeData[K]
@@ -36,9 +35,6 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
         onChange(updated);
     };
 
-    // ---------------------------------------------------------
-    // 2️⃣ Improve Summary (NO ANY)
-    // ---------------------------------------------------------
     const handleImproveSummary = async () => {
         if (!form.summary) return;
 
@@ -54,17 +50,13 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
         }
     };
 
-    // ---------------------------------------------------------
-    // 3️⃣ Add item to array (skills, experience, etc.)
-    // ---------------------------------------------------------
+
     const handleAddItem = <T,>(field: ArrayKeys, emptyItem: T) => {
         const updatedArray = [...(form[field] as T[]), emptyItem];
         handleChange(field, updatedArray as ResumeData[typeof field]);
     };
 
-    // ---------------------------------------------------------
-    // 4️⃣ Update array item (NO ANY)
-    // ---------------------------------------------------------
+ 
     const handleArrayChange = <
         T extends Skill | Experience | Education | Project,
         K extends keyof T
@@ -80,9 +72,6 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
         handleChange(section, updatedArray as ResumeData[typeof section]);
     };
 
-    // ---------------------------------------------------------
-    // 5️⃣ Upload Photo (NO ANY)
-    // ---------------------------------------------------------
     const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -92,22 +81,24 @@ export default function ResumeForm({ initialData, onChange }: FormProps) {
         reader.readAsDataURL(file);
     };
 
-    // ---------------------------------------------------------
-    //  UI START
-    // ---------------------------------------------------------
+    
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-3xl mx-auto space-y-6">
 
             {/* PHOTO */}
             <div>
                 <h2 className="text-2xl font-semibold border-b pb-1 mb-4">Profile Photo</h2>
+
                 <div className="flex items-center gap-4">
                     {form.photo ? (
-                        <img
-                            src={form.photo}
-                            alt="Profile"
-                            className="w-24 h-24 object-cover border rounded-md"
-                        />
+                        <div className="relative w-24 h-24">
+                            <Image
+                                src={form.photo}
+                                alt="Profile"
+                                fill
+                                className="object-cover border rounded-md"
+                            />
+                        </div>
                     ) : (
                         <div className="w-24 h-24 border rounded-md flex items-center justify-center">
                             No photo

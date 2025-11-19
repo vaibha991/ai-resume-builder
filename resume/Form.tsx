@@ -7,23 +7,22 @@ import { Button } from "@/components/ui/button";
 import { ResumeData, Skill, Project, Experience, Education } from "@/lib/types1";
 import { improveText } from "@/lib/ai";
 
-// --- Utility Types (for type-safe array handling) ---
-// Define the keys that hold arrays of objects or strings in ResumeData.
+
 type ArraySectionKey = 'experience' | 'education' | 'projects' | 'skills' | 'interests' | 'languages' | 'achievement' | 'relevantCoursework';
 
 // Mapped type to get the item type from an ArraySectionKey
-type ArrayItem<K extends ArraySectionKey> = 
+type ArrayItem<K extends ArraySectionKey> =
   K extends 'experience' ? Experience :
   K extends 'education' ? Education :
   K extends 'projects' ? Project :
   K extends 'skills' ? Skill :
   // Keys that hold string arrays:
-  K extends 'interests' ? string : 
-  K extends 'languages' ? string : 
+  K extends 'interests' ? string :
+  K extends 'languages' ? string :
   K extends 'achievement' ? string :
-  K extends 'relevantCoursework' ? string : 
+  K extends 'relevantCoursework' ? string :
   never;
-// -----------------------------------------------------
+
 
 interface FormProps {
   initialData: ResumeData;
@@ -40,11 +39,9 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     setFormData(initialData);
   }, [initialData]);
 
-  // --- Handle text inputs ---
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    // We assert [name] is a valid key of ResumeData for type safety
-    const updated: ResumeData = { ...formData, [name]: value }; 
+    const updated: ResumeData = { ...formData, [name]: value };
     setFormData(updated);
     onChange(updated);
   };
@@ -53,18 +50,21 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     K extends 'education' | 'experience' | 'projects' | 'skills',
     T extends ArrayItem<K>
   >(
-    section: K, 
+    section: K,
     index: number,
-    field: keyof T, // This is type-safe: only allows keys from the specific item type
+    field: keyof T,
     value: string
   ) => {
     const sectionArray = formData[section];
 
     if (Array.isArray(sectionArray)) {
       const updatedArray = [...(sectionArray as T[])];
-      
-      updatedArray[index] = { ...updatedArray[index] as Record<string, any>, [field]: value } as T;
-      
+
+      updatedArray[index] = {
+        ...updatedArray[index] as T,
+        [field]: value
+      } as T;
+
       const updated: ResumeData = { ...formData, [section]: updatedArray };
       setFormData(updated);
       onChange(updated);
@@ -72,20 +72,18 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
   };
 
 
-
   const addNewField = <
     K extends ArraySectionKey,
     T extends ArrayItem<K>
   >(
-    section: K, 
-    emptyTemplate: T // Template must match the specific item type T
+    section: K,
+    emptyTemplate: T 
   ) => {
     const sectionArray = formData[section];
-    
+
     if (Array.isArray(sectionArray)) {
-      // Append the new template, which is now of type T
       const updatedArray = [...(sectionArray as T[]), emptyTemplate];
-      
+
       const updated: ResumeData = {
         ...formData,
         [section]: updatedArray,
@@ -95,7 +93,7 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     }
   };
 
-  // --- Submit form ---
+ 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -104,7 +102,6 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     [formData, onSubmit]
   );
 
-  // --- Empty templates ---
   const emptyEducation: Education = {
     university: "",
     emphasis: "",
@@ -135,7 +132,7 @@ const Form: React.FC<FormProps> = ({ initialData, onChange, onSubmit, isNew = fa
     languages: "",
   };
 
-  // --- Improve Summary with AI ---
+
   const handleImproveSummary = async () => {
     if (!formData.summary) return;
     try {
