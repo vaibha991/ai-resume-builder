@@ -38,7 +38,7 @@ const Header = () => {
             onClick={() => signOut({ redirectUrl: "/sign-in" })}
             className="ml-4 border border-white/30 hover:border-white text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
           >
-            Sign Out
+            Sign 
           </button>
 
 
